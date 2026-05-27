@@ -2,7 +2,8 @@ pub const Arena = @This();
 
 const IconUrls = @import("IconUrls.zig");
 
-id: i32,
+id: i64,
 name: []const u8,
-raw_name: []const u8,
-icon_urls: IconUrls,
+rawName: []const u8,
+
+iconUrls: ?IconUrls = null,

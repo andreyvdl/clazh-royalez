@@ -1,6 +1,9 @@
-//! IconUrls are anon structs with 1 to 3 items.
+//! IconUrls are anon struct!
 pub const IconUrls = @This();
 
-medium: []const u8,
-hero_medium: ?[]const u8,
-evolution_medium: ?[]const u8,
+medium: ?[]const u8 = null,
+heroMedium: ?[]const u8 = null,
+evolutionMedium: ?[]const u8 = null,
+large: ?[]const u8 = null,
+heroLarge: ?[]const u8 = null,
+evolutionLarge: ?[]const u8 = null,

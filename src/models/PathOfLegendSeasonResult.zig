@@ -1,5 +1,5 @@
 pub const PathOfLegendSeasonResult = @This();
 
-trophies: i32,
-rank: i32,
-league_number: i32,
+trophies: i64,
+rank: i64,
+leagueNumber: i64,

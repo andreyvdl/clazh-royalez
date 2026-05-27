@@ -3,16 +3,20 @@ pub const PlayerItemLevel = @This();
 const IconUrls = @import("IconUrls.zig");
 const Rarity = @import("../enums.zig").Rarity;
 
-id: i32,
-/// original is string
-rarity: Rarity,
-count: i32,
-level: i32,
-star_level: i32,
-evolution_level: i32,
-used: bool,
 name: []const u8,
-max_level: i32,
-elixir_cost: i32,
-max_evolution_level: i32,
+id: i64,
+level: i64,
+maxLevel: i64,
+rarity: Rarity,
+count: i64,
 iconUrls: IconUrls,
+
+/// Bitwise variable
+///
+/// - 01 = have evolution
+/// - 10 = have hero
+maxEvolutionLevel: ?i64 = null,
+elixirCost: ?i64 = null,
+starLevel: ?i64 = null,
+evolutionLevel: ?i64 = null,
+used: ?bool = null,

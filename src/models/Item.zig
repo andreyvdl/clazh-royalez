@@ -3,10 +3,15 @@ pub const Item = @This();
 const IconUrls = @import("IconUrls.zig");
 const Rarity = @import("../enums.zig").Rarity;
 
-icon_urls: IconUrls,
 name: []const u8,
-id: i32,
+id: i64,
+maxLevel: i64,
+iconUrls: IconUrls,
 rarity: Rarity,
-max_level: i32,
-elixir_cost: i32,
-max_evolution_level: i32,
+
+elixirCost: ?i64 = null,
+/// bitwise variable
+///
+/// - 01 = have evolution
+/// - 10 = have hero
+maxEvolutionLevel: ?i64 = null,
