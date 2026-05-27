@@ -1,12 +1,12 @@
 const ClazhAPI = @This();
-
 const std = @import("std");
 const mem = std.mem;
 const http = std.http;
-pub const Result = @import("Result.zig").Result;
 
+pub const Result = @import("Result.zig").Result;
 pub const Player = @import("models/Player.zig");
 pub const ClientError = @import("models/ClientError.zig");
+pub const UpcomingChests = @import("models/UpcomingChests.zig");
 pub const common = @import("common.zig");
 
 const enums = @import("enums.zig");
@@ -37,7 +37,11 @@ pub fn deinit(capi: *ClazhAPI) void {
 
 const Players = @import("routes/Players.zig");
 
-/// Same as `/v1/players/{playerTag}`
+/// Same as `/players/{playerTag}`
 pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result(Player) {
     return try Players.getPlayer(capi, tag);
+}
+
+pub fn getUpcomingChests(capi: *ClazhAPI, tag: []const u8) !Result(UpcomingChests) {
+    return try Players.getUpcomingChests(capi, tag);
 }

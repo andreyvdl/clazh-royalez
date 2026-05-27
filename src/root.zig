@@ -26,3 +26,25 @@ test "player route" {
         },
     }
 }
+
+test "player upcoming chests" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(allocator, io, std.testing.environ.getPosix("TOKEN") orelse "");
+    defer api.deinit();
+
+    var chests = try api.getUpcomingChests("#VC080GQVP");
+    defer chests.deinit();
+
+    switch (chests) {
+        .success => std.debug.print("OK\n", .{}),
+        .fail => |e| {
+            const err = try e.value.toString(allocator);
+            defer allocator.free(err);
+            std.debug.print("{s}\n", .{err});
+            try std.testing.expect(false);
+        },
+    }
+}
