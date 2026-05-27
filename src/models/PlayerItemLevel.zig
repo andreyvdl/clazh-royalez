@@ -8,15 +8,19 @@ id: i64,
 level: i64,
 maxLevel: i64,
 rarity: Rarity,
-count: i64,
 iconUrls: IconUrls,
 
+count: ?i64 = null,
 /// Bitwise variable
 ///
-/// - 01 = have evolution
-/// - 10 = have hero
+/// - 01 = can be evolution
+/// - 10 = can be hero
 maxEvolutionLevel: ?i64 = null,
+/// bitwise variable
+///
+/// - 01 = unlocked evolution
+/// - 10 = unlocked hero
+evolutionLevel: ?i64 = null,
 elixirCost: ?i64 = null,
 starLevel: ?i64 = null,
-evolutionLevel: ?i64 = null,
 used: ?bool = null,

@@ -48,3 +48,25 @@ test "player upcoming chests" {
         },
     }
 }
+
+test "player battle log" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(allocator, io, std.testing.environ.getPosix("TOKEN") orelse "");
+    defer api.deinit();
+
+    var log = try api.getBattleLog("#VC080GQVP");
+    defer log.deinit();
+
+    switch (log) {
+        .success => std.debug.print("OK\n", .{}),
+        .fail => |e| {
+            const err = try e.value.toString(allocator);
+            defer allocator.free(err);
+            std.debug.print("{s}\n", .{err});
+            try std.testing.expect(false);
+        },
+    }
+}

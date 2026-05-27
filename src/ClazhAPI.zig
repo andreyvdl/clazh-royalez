@@ -7,7 +7,7 @@ pub const Result = @import("Result.zig").Result;
 pub const Player = @import("models/Player.zig");
 pub const ClientError = @import("models/ClientError.zig");
 pub const UpcomingChests = @import("models/UpcomingChests.zig");
-pub const common = @import("common.zig");
+pub const Battle = @import("models/Battle.zig");
 
 const enums = @import("enums.zig");
 
@@ -42,6 +42,15 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result(Player) {
     return try Players.getPlayer(capi, tag);
 }
 
+/// Same as `/players/{playerTag}/upcomingchests`
+///
+/// Probably something the game doesn't use anymore since it still has
+/// references to "Wooden Chest".
 pub fn getUpcomingChests(capi: *ClazhAPI, tag: []const u8) !Result(UpcomingChests) {
     return try Players.getUpcomingChests(capi, tag);
+}
+
+/// Same as `/players/{playerTag}/battlelog`
+pub fn getBattleLog(capi: *ClazhAPI, tag: []const u8) !Result([]Battle) {
+    return try Players.getBattleLog(capi, tag);
 }

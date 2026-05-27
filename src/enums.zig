@@ -19,9 +19,7 @@ pub const Rarity = enum {
 };
 
 pub const Role = enum {
-    not_member,
-    /// TODO! Check if the api returns with/out underline
-    // @"not member",
+    notMember,
     member,
     leader,
     admin,
@@ -32,6 +30,61 @@ pub const Role = enum {
     }
 
     pub fn toString(value: Role) []const u8 {
+        return @tagName(value);
+    }
+};
+
+pub const BattleType = enum {
+    PvP,
+    PvE,
+    clanmate,
+    tournament,
+    friendly,
+    survival,
+    PvP2v2,
+    clanmate2v2,
+    challenge2v2,
+    clanwarCollectionDay,
+    clanwarWarDay,
+    casual1v1,
+    casual2v2,
+    boatBattle,
+    boatBattlePractice,
+    riverRacePvP,
+    riverRaceDuel,
+    riverRaceDuelColosseum,
+    tutorial,
+    pathOfLegend,
+    seasonalBattle,
+    practice,
+    trail,
+    unknown,
+
+    pub fn fromString(str: []const u8) ?BattleType {
+        return std.meta.stringToEnum(BattleType, str);
+    }
+
+    pub fn toString(value: BattleType) []const u8 {
+        return @tagName(value);
+    }
+};
+
+pub const DeckSelection = enum {
+    collection,
+    draft,
+    draftCompetitive,
+    predefined,
+    eventDeck,
+    pick,
+    wardeckPick,
+    quaddeckPick,
+    unknown,
+
+    pub fn fromString(str: []const u8) ?DeckSelection {
+        return std.meta.stringToEnum(DeckSelection, str);
+    }
+
+    pub fn toString(value: DeckSelection) []const u8 {
         return @tagName(value);
     }
 };
