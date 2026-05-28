@@ -26,6 +26,7 @@ pub const PlayerClan = @import("models/PlayerClan.zig");
 pub const PlayerItemLevel = @import("models/PlayerItemLevel.zig");
 pub const PlayerLeagueStatistics =
     @import("models/PlayerLeagueStatistics.zig");
+pub const TrailEvent = @import("models/TrailEvent.zig");
 pub const UpcomingChests = @import("models/UpcomingChests.zig");
 
 pub const CardsQueryOptions = @import("CardsQueryOptions.zig");
@@ -96,4 +97,10 @@ const Cards = @import("routes/Cards.zig");
 /// Same as `/cards`
 pub fn getCards(capi: *ClazhAPI) !Result.Result(Items) {
     return try Cards.getCards(capi);
+}
+
+const Events = @import("routes/Events.zig");
+
+pub fn getEvents(capi: *ClazhAPI) !Result.Result([]TrailEvent) {
+    return try Events.getEvents(capi);
 }
