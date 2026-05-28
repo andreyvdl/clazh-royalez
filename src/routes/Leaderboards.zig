@@ -35,6 +35,9 @@ pub fn getLeaderboards(
 }
 
 /// Same as `/leaderboards/{leaderboardId}`
+///
+/// It is broken, recommended to use catch and filter for
+/// `error.UnexpectedEndOfInput` just like in tests.
 pub fn getLeaderboardsById(
     capi: *ClazhAPI,
     id: []const u8,
