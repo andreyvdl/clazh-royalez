@@ -9,6 +9,7 @@ const std = @import("std");
 
 const route = "https://api.clashroyale.com/v1/events";
 
+/// Same as `/events`
 pub fn getEvents(capi: *ClazhAPI) !Result.Result([]TrailEvent) {
     var body = std.Io.Writer.Allocating.init(capi.allocator);
     defer body.deinit();

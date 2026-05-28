@@ -11,7 +11,7 @@ pub const ClientError = @import("models/ClientError.zig");
 pub const GameMode = @import("models/GameMode.zig");
 pub const IconUrls = @import("models/IconUrls.zig");
 pub const Item = @import("models/Item.zig");
-pub const Items = @import("models/Items.zig");
+pub const ItemList = @import("models/ItemList.zig");
 pub const LeagueSeasonResult = @import("models/LeagueSeasonResult.zig");
 pub const PathOfLegendSeasonResult =
     @import("models/PathOfLegendSeasonResult.zig");
@@ -29,7 +29,6 @@ pub const PlayerLeagueStatistics =
 pub const TrailEvent = @import("models/TrailEvent.zig");
 pub const UpcomingChests = @import("models/UpcomingChests.zig");
 
-pub const CardsQueryOptions = @import("CardsQueryOptions.zig");
 pub const Result = @import("Result.zig");
 
 const enums = @import("enums.zig");
@@ -95,12 +94,13 @@ pub fn getBattleLog(capi: *ClazhAPI, tag: []const u8) !Result.Result([]Battle) {
 const Cards = @import("routes/Cards.zig");
 
 /// Same as `/cards`
-pub fn getCards(capi: *ClazhAPI) !Result.Result(Items) {
+pub fn getCards(capi: *ClazhAPI) !Result.Result(ItemList) {
     return try Cards.getCards(capi);
 }
 
 const Events = @import("routes/Events.zig");
 
+/// Same as `/events`
 pub fn getEvents(capi: *ClazhAPI) !Result.Result([]TrailEvent) {
     return try Events.getEvents(capi);
 }

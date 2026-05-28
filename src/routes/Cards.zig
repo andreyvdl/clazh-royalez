@@ -2,7 +2,7 @@ pub const Cards = @This();
 
 const ClazhAPI = @import("../ClazhAPI.zig");
 const Result = ClazhAPI.Result;
-const Items = ClazhAPI.Items;
+const ItemList = ClazhAPI.ItemList;
 const CardsQueryOptions = ClazhAPI.CardsQueryOptions;
 const ClientError = ClazhAPI.ClientError;
 const std = @import("std");
@@ -10,7 +10,7 @@ const std = @import("std");
 const route = "https://api.clashroyale.com/v1/cards";
 
 /// Same as `/cards`
-pub fn getCards(capi: *ClazhAPI) !Result.Result(Items) {
+pub fn getCards(capi: *ClazhAPI) !Result.Result(ItemList) {
     var body = std.Io.Writer.Allocating.init(capi.allocator);
     defer body.deinit();
 
@@ -25,9 +25,9 @@ pub fn getCards(capi: *ClazhAPI) !Result.Result(Items) {
     });
 
     if (res.status != .ok) return Result.Failed(
-        Items,
+        ItemList,
         try ClientError.fromJSON(capi.allocator, body.written()),
     );
 
-    return Result.unmountJSON(Items, capi.allocator, body.written());
+    return Result.unmountJSON(ItemList, capi.allocator, body.written());
 }
