@@ -88,3 +88,34 @@ pub const DeckSelection = enum {
         return @tagName(value);
     }
 };
+
+pub const Resource = enum {
+    gold,
+    unknown,
+
+    pub fn fromString(str: []const u8) ?Resource {
+        return std.meta.stringToEnum(Resource, str);
+    }
+
+    pub fn toString(value: Resource) []const u8 {
+        return @tagName(value);
+    }
+};
+
+pub const ItemType = enum {
+    none,
+    cardStack,
+    chest,
+    cardStackRandom,
+    resource,
+    tradeToken,
+    consumable,
+
+    pub fn fromString(str: []const u8) ?ItemType {
+        return std.meta.stringToEnum(ItemType, str);
+    }
+
+    pub fn toString(value: ItemType) []const u8 {
+        return @tagName(value);
+    }
+};

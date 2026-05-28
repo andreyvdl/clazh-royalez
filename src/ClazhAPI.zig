@@ -12,6 +12,8 @@ pub const GameMode = @import("models/GameMode.zig");
 pub const IconUrls = @import("models/IconUrls.zig");
 pub const Item = @import("models/Item.zig");
 pub const ItemList = @import("models/ItemList.zig");
+pub const LadderTournament = @import("models/LadderTournament.zig");
+pub const LadderTournamentList = @import("models/LadderTournamentList.zig");
 pub const LeagueSeasonResult = @import("models/LeagueSeasonResult.zig");
 pub const PathOfLegendSeasonResult =
     @import("models/PathOfLegendSeasonResult.zig");
@@ -32,7 +34,11 @@ pub const UpcomingChests = @import("models/UpcomingChests.zig");
 pub const Result = @import("Result.zig");
 
 const enums = @import("enums.zig");
+pub const BattleType = enums.BattleType;
+pub const DeckSelection = enums.DeckSelection;
+pub const ItemType = enums.ItemType;
 pub const Rarity = enums.Rarity;
+pub const Resource = enums.Resource;
 pub const Role = enums.Role;
 
 allocator: mem.Allocator = undefined,
@@ -103,4 +109,13 @@ const Events = @import("routes/Events.zig");
 /// Same as `/events`
 pub fn getEvents(capi: *ClazhAPI) !Result.Result([]TrailEvent) {
     return try Events.getEvents(capi);
+}
+
+const GlobalTournaments = @import("routes/GlobalTournaments.zig");
+
+/// Same as `/globaltournaments`
+pub fn getGlobalTournaments(
+    capi: *ClazhAPI,
+) !Result.Result(LadderTournamentList) {
+    return try GlobalTournaments.getGlobalTournaments(capi);
 }

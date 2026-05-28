@@ -178,3 +178,43 @@ test "events" {
         },
     }
 }
+
+test "gloabal tournaments" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var events = try api.getGlobalTournaments();
+    const end = std.Io.Clock.awake.now(io);
+    defer events.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("elapsed: {}ms ", .{elapsed});
+    switch (events) {
+        .success => |e| {
+            const items = e.value;
+            std.debug.print(
+                "global tournaments len = {} ",
+                .{items.items.?.len},
+            );
+            std.debug.print("OK\n", .{});
+        },
+        .fail => |e| {
+            const err = try e.value.toString(allocator);
+            defer allocator.free(err);
+            std.debug.print("{s}\n", .{err});
+            try std.testing.expect(false);
+        },
+    }
+}
