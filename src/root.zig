@@ -1,10 +1,5 @@
 const std = @import("std");
 const ClazhAPI = @import("ClazhAPI.zig");
-const errors = ClazhAPI.errors;
-const Rarity = ClazhAPI.Rarity;
-const Role = ClazhAPI.Role;
-const Players = ClazhAPI.Players;
-const CardsQueryOptions = ClazhAPI.CardsQueryOptions;
 
 test "player route" {
     const allocator = std.testing.allocator;
@@ -179,7 +174,7 @@ test "events" {
     }
 }
 
-test "gloabal tournaments" {
+test "global tournaments" {
     const allocator = std.testing.allocator;
     const io = std.testing.io;
     var api: ClazhAPI = undefined;
@@ -192,21 +187,109 @@ test "gloabal tournaments" {
     defer api.deinit();
 
     const now = std.Io.Clock.awake.now(io);
-    var events = try api.getGlobalTournaments();
+    var tournaments = try api.getGlobalTournaments();
     const end = std.Io.Clock.awake.now(io);
-    defer events.deinit();
+    defer tournaments.deinit();
     const elapsed = @divTrunc(
         (end.nanoseconds - now.nanoseconds),
         std.time.ns_per_ms,
     );
 
     std.debug.print("elapsed: {}ms ", .{elapsed});
-    switch (events) {
-        .success => |e| {
-            const items = e.value;
+    switch (tournaments) {
+        .success => |t| {
+            const items = t.value;
             std.debug.print(
                 "global tournaments len = {} ",
                 .{items.items.?.len},
+            );
+            std.debug.print("OK\n", .{});
+        },
+        .fail => |e| {
+            const err = try e.value.toString(allocator);
+            defer allocator.free(err);
+            std.debug.print("{s}\n", .{err});
+            try std.testing.expect(false);
+        },
+    }
+}
+
+test "leaderboards" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var leaderboards = try api.getLeaderboards();
+    const end = std.Io.Clock.awake.now(io);
+    defer leaderboards.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("elapsed: {}ms ", .{elapsed});
+    switch (leaderboards) {
+        .success => |l| {
+            const items = l.value;
+            std.debug.print(
+                "leaderboards len = {} ",
+                .{items.items.len},
+            );
+            std.debug.print("OK\n", .{});
+        },
+        .fail => |e| {
+            const err = try e.value.toString(allocator);
+            defer allocator.free(err);
+            std.debug.print("{s}\n", .{err});
+            try std.testing.expect(false);
+        },
+    }
+}
+
+test "leaderboards by id" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var leaderboards = api.getLeaderboardsById("502514") catch |e| {
+        switch (e) {
+            error.UnexpectedEndOfInput => {
+                std.debug.print("Expected error!\n", .{});
+                return;
+            },
+            else => return e,
+        }
+    };
+    const end = std.Io.Clock.awake.now(io);
+    defer leaderboards.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("elapsed: {}ms ", .{elapsed});
+    switch (leaderboards) {
+        .success => |l| {
+            const items = l.value;
+            std.debug.print(
+                "leaderboardsId len = {} ",
+                .{items.items.len},
             );
             std.debug.print("OK\n", .{});
         },

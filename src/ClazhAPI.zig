@@ -14,6 +14,8 @@ pub const Item = @import("models/Item.zig");
 pub const ItemList = @import("models/ItemList.zig");
 pub const LadderTournament = @import("models/LadderTournament.zig");
 pub const LadderTournamentList = @import("models/LadderTournamentList.zig");
+pub const Leaderboard = @import("models/Leaderboard.zig");
+pub const LeaderboardList = @import("models/LeaderboardList.zig");
 pub const LeagueSeasonResult = @import("models/LeagueSeasonResult.zig");
 pub const PathOfLegendSeasonResult =
     @import("models/PathOfLegendSeasonResult.zig");
@@ -118,4 +120,19 @@ pub fn getGlobalTournaments(
     capi: *ClazhAPI,
 ) !Result.Result(LadderTournamentList) {
     return try GlobalTournaments.getGlobalTournaments(capi);
+}
+
+const Leaderboards = @import("routes/Leaderboards.zig");
+
+/// Same as `/leaderboards`
+pub fn getLeaderboards(capi: *ClazhAPI) !Result.Result(LeaderboardList) {
+    return try Leaderboards.getLeaderboards(capi);
+}
+
+/// Same as `/leaderboards/{leaderboardId}`
+pub fn getLeaderboardsById(
+    capi: *ClazhAPI,
+    id: []const u8,
+) !Result.Result(LeaderboardList) {
+    return try Leaderboards.getLeaderboardsById(capi, id);
 }
