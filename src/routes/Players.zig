@@ -1,11 +1,11 @@
 pub const Players = @This();
 
 const ClazhAPI = @import("../ClazhAPI.zig");
-const Result = @import("../Result.zig");
-const Player = ClazhAPI.Player;
-const ClientError = ClazhAPI.ClientError;
-const UpcomingChests = ClazhAPI.UpcomingChests;
 const Battle = ClazhAPI.Battle;
+const ClientError = ClazhAPI.ClientError;
+const Player = ClazhAPI.Player;
+const Result = ClazhAPI.Result;
+const UpcomingChests = ClazhAPI.UpcomingChests;
 const std = @import("std");
 const route = "https://api.clashroyale.com/v1/players/";
 const hashtag = "%23";
@@ -17,7 +17,11 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
 
     var body = std.Io.Writer.Allocating.init(capi.allocator);
     defer body.deinit();
-    const url = try std.mem.concat(capi.allocator, u8, &.{ route, modded_tag });
+    const url = try std.mem.concat(
+        capi.allocator,
+        u8,
+        &.{ route, modded_tag },
+    );
     defer capi.allocator.free(url);
 
     const res = try capi.client.fetch(.{
@@ -30,7 +34,10 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
         .keep_alive = false,
     });
 
-    if (res.status != .ok) return Result.Failed(Player, try ClientError.fromJSON(capi.allocator, body.written()));
+    if (res.status != .ok) return Result.Failed(
+        Player,
+        try ClientError.fromJSON(capi.allocator, body.written()),
+    );
 
     return Result.unmountJSON(Player, capi.allocator, body.written());
 }
@@ -39,13 +46,20 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
 ///
 /// Probably something the game doesn't use anymore since it still has
 /// references to "Wooden Chest".
-pub fn getUpcomingChests(capi: *ClazhAPI, tag: []const u8) !Result.Result(UpcomingChests) {
+pub fn getUpcomingChests(
+    capi: *ClazhAPI,
+    tag: []const u8,
+) !Result.Result(UpcomingChests) {
     const modded_tag = try modTag(capi.allocator, tag);
     defer capi.allocator.free(modded_tag);
 
     var body = std.Io.Writer.Allocating.init(capi.allocator);
     defer body.deinit();
-    const url = try std.mem.concat(capi.allocator, u8, &.{ route, modded_tag, "/upcomingchests" });
+    const url = try std.mem.concat(
+        capi.allocator,
+        u8,
+        &.{ route, modded_tag, "/upcomingchests" },
+    );
     defer capi.allocator.free(url);
 
     const res = try capi.client.fetch(.{
@@ -58,22 +72,28 @@ pub fn getUpcomingChests(capi: *ClazhAPI, tag: []const u8) !Result.Result(Upcomi
         .keep_alive = false,
     });
 
-    if (res.status != .ok) return Result.Failed(UpcomingChests, try ClientError.fromJSON(capi.allocator, body.written()));
+    if (res.status != .ok) return Result.Failed(
+        UpcomingChests,
+        try ClientError.fromJSON(capi.allocator, body.written()),
+    );
 
     return Result.unmountJSON(UpcomingChests, capi.allocator, body.written());
 }
 
 /// Same as `/players/{playerTag}/battlelog`
-pub fn getBattleLog(capi: *ClazhAPI, tag: []const u8) !Result.Result([]Battle) {
+pub fn getBattleLog(
+    capi: *ClazhAPI,
+    tag: []const u8,
+) !Result.Result([]Battle) {
     const modded_tag = try modTag(capi.allocator, tag);
     defer capi.allocator.free(modded_tag);
-
-    const f = try std.Io.Dir.createFile(.cwd(), capi.io, "output.json", .{});
-    defer f.close(capi.io);
-
     var body = std.Io.Writer.Allocating.init(capi.allocator);
     defer body.deinit();
-    const url = try std.mem.concat(capi.allocator, u8, &.{ route, modded_tag, "/battlelog" });
+    const url = try std.mem.concat(
+        capi.allocator,
+        u8,
+        &.{ route, modded_tag, "/battlelog" },
+    );
     defer capi.allocator.free(url);
 
     const res = try capi.client.fetch(.{
@@ -86,9 +106,10 @@ pub fn getBattleLog(capi: *ClazhAPI, tag: []const u8) !Result.Result([]Battle) {
         .keep_alive = false,
     });
 
-    try f.writeStreamingAll(capi.io, body.written());
-
-    if (res.status != .ok) return Result.Failed([]Battle, try ClientError.fromJSON(capi.allocator, body.written()));
+    if (res.status != .ok) return Result.Failed(
+        []Battle,
+        try ClientError.fromJSON(capi.allocator, body.written()),
+    );
 
     return Result.unmountJSON([]Battle, capi.allocator, body.written());
 }

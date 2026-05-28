@@ -23,8 +23,17 @@ pub fn Success(comptime T: type, parsed: std.json.Parsed(T)) Result(T) {
     return Result(T){ .success = parsed };
 }
 
-pub fn unmountJSON(comptime T: type, allocator: std.mem.Allocator, json: []const u8) !Result(T) {
-    const parsed = try std.json.parseFromSlice(T, allocator, json, .{});
+pub fn unmountJSON(
+    comptime T: type,
+    allocator: std.mem.Allocator,
+    json: []const u8,
+) !Result(T) {
+    const parsed = try std.json.parseFromSlice(
+        T,
+        allocator,
+        json,
+        .{},
+    );
 
     return Success(T, parsed);
 }
