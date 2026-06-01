@@ -1,4 +1,5 @@
 pub const GameMode = @This();
 
 id: i64,
-name: []const u8,
+
+name: ?[]const u8 = null,

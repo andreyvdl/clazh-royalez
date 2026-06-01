@@ -6,11 +6,13 @@ const Rarity = enums.Rarity;
 const Resource = enums.Resource;
 const ItemType = enums.ItemType;
 
+amount: i64,
+wins: i64,
+
+card: Item,
 rarity: Rarity,
-chest: []const u8,
 resource: Resource,
 type: ItemType,
-amount: i64,
-card: Item,
+
+chest: []const u8,
 consumableName: []const u8,
-wins: i64,

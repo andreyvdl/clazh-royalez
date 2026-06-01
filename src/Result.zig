@@ -32,7 +32,7 @@ pub fn unmountJSON(
         T,
         allocator,
         json,
-        .{},
+        .{ .allocate = .alloc_always },
     );
 
     return Success(T, parsed);

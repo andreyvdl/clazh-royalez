@@ -25,12 +25,7 @@ test "player route" {
     std.debug.print("elapsed: {}ms ", .{elapsed});
     switch (player) {
         .success => std.debug.print("OK\n", .{}),
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -58,12 +53,7 @@ test "player upcoming chests" {
     std.debug.print("elapsed: {}ms ", .{elapsed});
     switch (chests) {
         .success => std.debug.print("OK\n", .{}),
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -91,12 +81,7 @@ test "player battle log" {
     std.debug.print("elapsed: {}ms ", .{elapsed});
     switch (log) {
         .success => std.debug.print("OK\n", .{}),
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -125,15 +110,10 @@ test "cards" {
     switch (cards) {
         .success => |c| {
             const items = c.value;
-            std.debug.print("cards len = {} ", .{items.items.len});
+            std.debug.print("cards len = {d} ", .{items.items.len});
             std.debug.print("OK\n", .{});
         },
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -162,15 +142,10 @@ test "events" {
     switch (events) {
         .success => |e| {
             const items = e.value;
-            std.debug.print("events len = {} ", .{items.len});
+            std.debug.print("events len = {d} ", .{items.len});
             std.debug.print("OK\n", .{});
         },
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -200,17 +175,12 @@ test "global tournaments" {
         .success => |t| {
             const items = t.value;
             std.debug.print(
-                "global tournaments len = {} ",
+                "global tournaments len = {d} ",
                 .{items.items.?.len},
             );
             std.debug.print("OK\n", .{});
         },
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -240,17 +210,12 @@ test "leaderboards" {
         .success => |l| {
             const items = l.value;
             std.debug.print(
-                "leaderboards len = {} ",
+                "leaderboards len = {d} ",
                 .{items.items.len},
             );
             std.debug.print("OK\n", .{});
         },
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
-        },
+        else => try std.testing.expect(false),
     }
 }
 
@@ -270,7 +235,7 @@ test "leaderboards by id" {
     var leaderboards = api.getLeaderboardsById("502514") catch |e| {
         switch (e) {
             error.UnexpectedEndOfInput => {
-                std.debug.print("Expected error!\n", .{});
+                std.debug.print("Expected error! shitty api\n", .{});
                 return;
             },
             else => return e,
@@ -288,16 +253,73 @@ test "leaderboards by id" {
         .success => |l| {
             const items = l.value;
             std.debug.print(
-                "leaderboardsId len = {} ",
+                "leaderboardsId len = {d} ",
                 .{items.items.len},
             );
             std.debug.print("OK\n", .{});
         },
-        .fail => |e| {
-            const err = try e.value.toString(allocator);
-            defer allocator.free(err);
-            std.debug.print("{s}\n", .{err});
-            try std.testing.expect(false);
+        else => try std.testing.expect(false),
+    }
+}
+
+test "tournaments" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var tournaments = try api.getTournaments("Tor", null, null, null);
+    const end = std.Io.Clock.awake.now(io);
+    defer tournaments.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("elapsed: {}ms ", .{elapsed});
+    switch (tournaments) {
+        .success => |t| {
+            std.debug.print(
+                "tournaments len = {d} ",
+                .{t.value.items.len},
+            );
+            std.debug.print("OK\n", .{});
         },
+        else => try std.testing.expect(false),
+    }
+}
+
+test "tournament by tag" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var tournament = try api.getTournamentFromTag("#2R00GRV2");
+    const end = std.Io.Clock.awake.now(io);
+    defer tournament.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("elapsed: {}ms ", .{elapsed});
+    switch (tournament) {
+        .success => std.debug.print("OK\n", .{}),
+        else => try std.testing.expect(false),
     }
 }

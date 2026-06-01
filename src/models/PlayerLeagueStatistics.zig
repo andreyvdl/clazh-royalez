@@ -2,6 +2,6 @@ pub const PlayerLeagueStatistics = @This();
 
 const LeagueSeasonResult = @import("LeagueSeasonResult.zig");
 
-currentSeason: LeagueSeasonResult,
 bestSeason: LeagueSeasonResult,
+currentSeason: LeagueSeasonResult,
 previousSeason: LeagueSeasonResult,

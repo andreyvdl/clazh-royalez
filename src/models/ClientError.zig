@@ -1,7 +1,7 @@
 pub const ClientError = @This();
 
-reason: []const u8 = undefined,
-message: []const u8 = undefined,
+message: []const u8,
+reason: []const u8,
 type: ?[]const u8 = null,
 
 const std = @import("std");
@@ -13,7 +13,7 @@ pub fn toString(
 ) ![]const u8 {
     return try std.fmt.allocPrint(
         allocator,
-        "reason: {s},\nmsg: {s},\ntype: {?s}\n",
+        "reason: {s},\nmsg: {s},\ntype: {any}\n",
         .{
             ce.reason, ce.message, ce.type,
         },
@@ -40,7 +40,7 @@ pub fn fromJSON(
         ClientError,
         allocator,
         json,
-        .{},
+        .{ .allocate = .alloc_always },
     );
 
     return parsed;

@@ -30,13 +30,17 @@ pub const PlayerClan = @import("models/PlayerClan.zig");
 pub const PlayerItemLevel = @import("models/PlayerItemLevel.zig");
 pub const PlayerLeagueStatistics =
     @import("models/PlayerLeagueStatistics.zig");
+pub const Tournament = @import("models/Tournament.zig");
+pub const TournamentHeader = @import("models/TournamentHeader.zig");
+pub const TournamentMember = @import("models/TournamentMember.zig");
 pub const TrailEvent = @import("models/TrailEvent.zig");
-pub const UpcomingChests = @import("models/UpcomingChests.zig");
 
 pub const Result = @import("Result.zig");
+pub const Response = @import("models/internal/Response.zig");
 
 const enums = @import("enums.zig");
 pub const BattleType = enums.BattleType;
+pub const Card = enums.Card;
 pub const DeckSelection = enums.DeckSelection;
 pub const ItemType = enums.ItemType;
 pub const Rarity = enums.Rarity;
@@ -80,6 +84,7 @@ const Players = @import("routes/Players.zig");
 
 /// Same as `/players/{playerTag}`
 pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
+    if (tag.len == 0) return error.InvalidTag;
     return try Players.getPlayer(capi, tag);
 }
 
@@ -90,12 +95,14 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
 pub fn getUpcomingChests(
     capi: *ClazhAPI,
     tag: []const u8,
-) !Result.Result(UpcomingChests) {
+) !Result.Result(Response.Response(Chest)) {
+    if (tag.len == 0) return error.InvalidTag;
     return try Players.getUpcomingChests(capi, tag);
 }
 
 /// Same as `/players/{playerTag}/battlelog`
 pub fn getBattleLog(capi: *ClazhAPI, tag: []const u8) !Result.Result([]Battle) {
+    if (tag.len == 0) return error.InvalidTag;
     return try Players.getBattleLog(capi, tag);
 }
 
@@ -137,5 +144,41 @@ pub fn getLeaderboardsById(
     capi: *ClazhAPI,
     id: []const u8,
 ) !Result.Result(LeaderboardList) {
+    if (id.len == 0) return error.InvalidId;
     return try Leaderboards.getLeaderboardsById(capi, id);
+}
+
+pub const Tournaments = @import("routes/Tournaments.zig");
+
+/// Same as `/tournaments?name={name}[&limit=int&after=str&before=str]`
+///
+/// Name should be at least 3 characters long.
+pub fn getTournaments(
+    capi: *ClazhAPI,
+    name: []const u8,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(TournamentHeader)) {
+    if (name.len < 3) return error.NameLessThanThreeCharacters;
+
+    var buf: [65]u8 = undefined;
+    const l_str = if (limit) |l| try std.fmt.bufPrint(&buf, "{d}", .{l}) else "";
+
+    return try Tournaments.getTournaments(
+        capi,
+        name,
+        l_str,
+        after orelse "",
+        before orelse "",
+    );
+}
+
+/// Same as `/tournaments/{tournamentTag}`
+pub fn getTournamentFromTag(
+    capi: *ClazhAPI,
+    tag: []const u8,
+) !Result.Result(Tournament) {
+    if (tag.len == 0) return error.InvalidTag;
+    return try Tournaments.getTournamentFromTag(capi, tag);
 }
