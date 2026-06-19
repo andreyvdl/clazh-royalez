@@ -323,3 +323,37 @@ test "tournament by tag" {
         else => try std.testing.expect(false),
     }
 }
+
+test "get clan" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var clan_list = try api.getClans("Jesus", 0, 0, 0, 0, null, null, null);
+    const end = std.Io.Clock.awake.now(io);
+    defer clan_list.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("elapsed: {}ms ", .{elapsed});
+    switch (clan_list) {
+        .success => |c| {
+            std.debug.print(
+                "clans len = {d} ",
+                .{c.value.items.len},
+            );
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}

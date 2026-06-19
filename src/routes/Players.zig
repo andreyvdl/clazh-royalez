@@ -9,23 +9,24 @@ const Response = ClazhAPI.Response;
 const Chest = ClazhAPI.Chest;
 const ChestResponse = Response.Response(Chest);
 const std = @import("std");
-const aux = @import("../aux.zig");
 
 const route = "https://api.clashroyale.com/v1/players/";
 
+const hashtag = "%23";
+
 /// Same as `/players/{playerTag}`
 pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
-    const modded_tag = try aux.modTag(capi.allocator, tag);
-    defer capi.allocator.free(modded_tag);
+    const modded_tag = try modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
 
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
     const url = try std.mem.concat(
-        capi.allocator,
+        capi.gpa,
         u8,
         &.{ route, modded_tag },
     );
-    defer capi.allocator.free(url);
+    defer capi.gpa.free(url);
 
     const res = try capi.client.fetch(.{
         .method = .GET,
@@ -39,10 +40,10 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
 
     if (res.status != .ok) return Result.Failed(
         Player,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
-    return Result.unmountJSON(Player, capi.allocator, body.written());
+    return Result.unmountJSON(Player, capi.gpa, body.written());
 }
 
 /// Same as `/players/{playerTag}/upcomingchests`
@@ -53,17 +54,17 @@ pub fn getUpcomingChests(
     capi: *ClazhAPI,
     tag: []const u8,
 ) !Result.Result(ChestResponse) {
-    const modded_tag = try aux.modTag(capi.allocator, tag);
-    defer capi.allocator.free(modded_tag);
+    const modded_tag = try modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
 
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
     const url = try std.mem.concat(
-        capi.allocator,
+        capi.gpa,
         u8,
         &.{ route, modded_tag, "/upcomingchests" },
     );
-    defer capi.allocator.free(url);
+    defer capi.gpa.free(url);
 
     const res = try capi.client.fetch(.{
         .method = .GET,
@@ -77,10 +78,10 @@ pub fn getUpcomingChests(
 
     if (res.status != .ok) return Result.Failed(
         ChestResponse,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
-    return Result.unmountJSON(ChestResponse, capi.allocator, body.written());
+    return Result.unmountJSON(ChestResponse, capi.gpa, body.written());
 }
 
 /// Same as `/players/{playerTag}/battlelog`
@@ -88,16 +89,16 @@ pub fn getBattleLog(
     capi: *ClazhAPI,
     tag: []const u8,
 ) !Result.Result([]Battle) {
-    const modded_tag = try aux.modTag(capi.allocator, tag);
-    defer capi.allocator.free(modded_tag);
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    const modded_tag = try modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
     const url = try std.mem.concat(
-        capi.allocator,
+        capi.gpa,
         u8,
         &.{ route, modded_tag, "/battlelog" },
     );
-    defer capi.allocator.free(url);
+    defer capi.gpa.free(url);
 
     const res = try capi.client.fetch(.{
         .method = .GET,
@@ -111,8 +112,17 @@ pub fn getBattleLog(
 
     if (res.status != .ok) return Result.Failed(
         []Battle,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
-    return Result.unmountJSON([]Battle, capi.allocator, body.written());
+    return Result.unmountJSON([]Battle, capi.gpa, body.written());
+}
+
+pub fn modTag(allocator: std.mem.Allocator, tag: []const u8) ![]const u8 {
+    if (tag[0] == '#') {
+        return try std.mem.concat(allocator, u8, &.{ hashtag, tag[1..] });
+    } else if (std.ascii.isAlphanumeric(tag[0])) {
+        return try std.mem.concat(allocator, u8, &.{ hashtag, tag });
+    }
+    return error.InvalidTag;
 }

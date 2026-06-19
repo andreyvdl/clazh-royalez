@@ -13,7 +13,7 @@ const route = "https://api.clashroyale.com/v1/leaderboards";
 pub fn getLeaderboards(
     capi: *ClazhAPI,
 ) !Result.Result(LeaderboardList) {
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
     const res = try capi.client.fetch(.{
@@ -28,10 +28,10 @@ pub fn getLeaderboards(
 
     if (res.status != .ok) return Result.Failed(
         LeaderboardList,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
-    return Result.unmountJSON(LeaderboardList, capi.allocator, body.written());
+    return Result.unmountJSON(LeaderboardList, capi.gpa, body.written());
 }
 
 /// Same as `/leaderboards/{leaderboardId}`
@@ -42,9 +42,9 @@ pub fn getLeaderboardsById(
     capi: *ClazhAPI,
     id: []const u8,
 ) !Result.Result(LeaderboardList) {
-    const url = try std.mem.concat(capi.allocator, u8, &.{ route, "/", id });
-    defer capi.allocator.free(url);
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    const url = try std.mem.concat(capi.gpa, u8, &.{ route, "/", id });
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
     const res = try capi.client.fetch(.{
@@ -59,8 +59,8 @@ pub fn getLeaderboardsById(
 
     if (res.status != .ok) return Result.Failed(
         LeaderboardList,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
-    return Result.unmountJSON(LeaderboardList, capi.allocator, body.written());
+    return Result.unmountJSON(LeaderboardList, capi.gpa, body.written());
 }

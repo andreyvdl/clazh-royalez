@@ -11,7 +11,7 @@ const route = "https://api.clashroyale.com/v1/events";
 
 /// Same as `/events`
 pub fn getEvents(capi: *ClazhAPI) !Result.Result([]TrailEvent) {
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
     const res = try capi.client.fetch(.{
@@ -26,8 +26,8 @@ pub fn getEvents(capi: *ClazhAPI) !Result.Result([]TrailEvent) {
 
     if (res.status != .ok) return Result.Failed(
         []TrailEvent,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
-    return Result.unmountJSON([]TrailEvent, capi.allocator, body.written());
+    return Result.unmountJSON([]TrailEvent, capi.gpa, body.written());
 }

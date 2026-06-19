@@ -13,7 +13,7 @@ const route = "https://api.clashroyale.com/v1/globaltournaments";
 pub fn getGlobalTournaments(
     capi: *ClazhAPI,
 ) !Result.Result(LadderTournamentList) {
-    var body = std.Io.Writer.Allocating.init(capi.allocator);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
     const res = try capi.client.fetch(.{
@@ -28,12 +28,12 @@ pub fn getGlobalTournaments(
 
     if (res.status != .ok) return Result.Failed(
         LadderTournamentList,
-        try ClientError.fromJSON(capi.allocator, body.written()),
+        try ClientError.fromJSON(capi.gpa, body.written()),
     );
 
     return Result.unmountJSON(
         LadderTournamentList,
-        capi.allocator,
+        capi.gpa,
         body.written(),
     );
 }

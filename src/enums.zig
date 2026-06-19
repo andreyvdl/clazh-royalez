@@ -149,6 +149,66 @@ pub const TournamentType = enum {
     }
 };
 
+pub const RiverRaceState = enum {
+    clanNotFound,
+    accessDenied,
+    matchmaking,
+    matched,
+    full,
+    ended,
+
+    pub fn fromString(str: []const u8) ?RiverRaceState {
+        return std.meta.stringToEnum(RiverRaceState, str);
+    }
+
+    pub fn toString(value: RiverRaceState) []const u8 {
+        return @tagName(value);
+    }
+};
+
+pub const RiverRacePeriodType = enum {
+    training,
+    warDay,
+    colosseum,
+
+    pub fn fromString(str: []const u8) ?RiverRacePeriodType {
+        return std.meta.stringToEnum(RiverRacePeriodType, str);
+    }
+
+    pub fn toString(value: RiverRacePeriodType) []const u8 {
+        return @tagName(value);
+    }
+};
+
+pub const ClanChestStatus = enum {
+    inactive,
+    active,
+    completed,
+    unknown,
+
+    pub fn fromString(str: []const u8) ?ClanChestStatus {
+        return std.meta.stringToEnum(ClanChestStatus, str);
+    }
+
+    pub fn toString(value: ClanChestStatus) []const u8 {
+        return @tagName(value);
+    }
+};
+
+pub const ClanType = enum {
+    open,
+    inviteOnly,
+    closed,
+
+    pub fn fromString(str: []const u8) ?ClanType {
+        return std.meta.stringToEnum(ClanType, str);
+    }
+
+    pub fn toString(value: ClanType) []const u8 {
+        return @tagName(value);
+    }
+};
+
 pub const Card = enum(u32) {
     Knight = 26000000,
     Archers = 26000001,
