@@ -23,7 +23,8 @@ pub const Role = enum {
     member,
     leader,
     admin,
-    coleader,
+    coLeader,
+    elder,
 
     pub fn fromString(str: []const u8) ?Role {
         return std.meta.stringToEnum(Role, str);

@@ -273,3 +273,9 @@ pub fn getClans(
 
     return try Clans.getClans(capi, opts);
 }
+
+/// Same as `/clans/{clanTag}`
+pub fn getClanByTag(capi: *ClazhAPI, tag: []const u8) !Result.Result(Clan) {
+    if (tag.len == 0) return error.InvalidTag;
+    return try Clans.getClanByTag(capi, tag);
+}

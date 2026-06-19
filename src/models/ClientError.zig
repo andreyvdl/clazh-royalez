@@ -1,6 +1,6 @@
 pub const ClientError = @This();
 
-message: []const u8,
+message: ?[]const u8 = null,
 reason: []const u8,
 type: ?[]const u8 = null,
 

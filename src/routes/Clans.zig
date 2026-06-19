@@ -10,7 +10,8 @@ const ClanResponse = Response.Response(Clan);
 
 const std = @import("std");
 
-/// Same as `/clans/{clanTag}/warlog`
+const route = "https://api.clashroyale.com/v1/clans";
+
 /// Same as `/clans`
 pub fn getClans(
     capi: *ClazhAPI,
@@ -41,14 +42,42 @@ pub fn getClans(
     return Result.unmountJSON(ClanResponse, capi.gpa, body.written());
 }
 
+/// Same as `/clans/{clanTag}`
+pub fn getClanByTag(capi: *ClazhAPI, tag: []const u8) !Result.Result(Clan) {
+    const base_url = route ++ "/";
+    const modded_tag = try modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
+    const url = try std.mem.concat(capi.gpa, u8, &.{ base_url, modded_tag });
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            Clan,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(Clan, capi.gpa, body.written());
+}
+
+/// Same as `/clans/{clanTag}/warlog`
 /// Same as `/clans/{clanTag}/riverracelog`
 /// Same as `/clans/{clanTag}/currentwar`
-/// Same as `/clans/{clanTag}`
 /// Same as `/clans/{clanTag}/members`
 /// Same as `/clans/{clanTag}/currentriverrace`
 pub fn voider() void {}
-
-const route = "https://api.clashroyale.com/v1/clans?";
 
 fn setupUrl(
     allocator: std.mem.Allocator,
@@ -72,6 +101,7 @@ fn setupUrl(
 
     if (mh.name.len > 0) {
         if (first) {
+            try buf.appendSlice(allocator, "?");
             try buf.appendSlice(allocator, n[1..]);
             first = false;
         } else {
@@ -81,6 +111,7 @@ fn setupUrl(
     }
     if (mh.location_id.len > 0) {
         if (first) {
+            try buf.appendSlice(allocator, "?");
             try buf.appendSlice(allocator, lid[1..]);
             first = false;
         } else {
@@ -90,6 +121,7 @@ fn setupUrl(
     }
     if (mh.max_members.len > 0) {
         if (first) {
+            try buf.appendSlice(allocator, "?");
             try buf.appendSlice(allocator, max[1..]);
             first = false;
         } else {
@@ -99,6 +131,7 @@ fn setupUrl(
     }
     if (mh.min_members.len > 0) {
         if (first) {
+            try buf.appendSlice(allocator, "?");
             try buf.appendSlice(allocator, min[1..]);
             first = false;
         } else {
@@ -108,6 +141,7 @@ fn setupUrl(
     }
     if (mh.min_score.len > 0) {
         if (first) {
+            try buf.appendSlice(allocator, "?");
             try buf.appendSlice(allocator, s[1..]);
             first = false;
         } else {
@@ -129,4 +163,15 @@ fn setupUrl(
         try buf.appendSlice(allocator, op.before);
     }
     return try buf.toOwnedSlice(allocator);
+}
+
+fn modTag(allocator: std.mem.Allocator, tag: []const u8) ![]const u8 {
+    const hashtag = "%23";
+
+    if (tag[0] == '#') {
+        return try std.mem.concat(allocator, u8, &.{ hashtag, tag[1..] });
+    } else if (std.ascii.isAlphanumeric(tag[0])) {
+        return try std.mem.concat(allocator, u8, &.{ hashtag, tag });
+    }
+    return error.InvalidTag;
 }
