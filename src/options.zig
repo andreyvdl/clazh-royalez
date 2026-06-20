@@ -26,3 +26,9 @@ pub const ClansOptions = struct {
         before: []const u8 = "",
     } = .{},
 };
+
+pub const PagingOptions = struct {
+    limit: []const u8 = "",
+    after: []const u8 = "",
+    before: []const u8 = "",
+};

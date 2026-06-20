@@ -6,7 +6,10 @@ const ClientError = ClazhAPI.ClientError;
 const Response = ClazhAPI.Response;
 const ClansOptions = ClazhAPI.ClansOptions;
 const Clan = ClazhAPI.Clan;
+const ClanMember = ClazhAPI.ClanMember;
 const ClanResponse = Response.Response(Clan);
+const ClanMemberResponse = Response.Response(ClanMember);
+const PagingOptions = ClazhAPI.PagingOptions;
 
 const std = @import("std");
 
@@ -72,10 +75,43 @@ pub fn getClanByTag(capi: *ClazhAPI, tag: []const u8) !Result.Result(Clan) {
     return Result.unmountJSON(Clan, capi.gpa, body.written());
 }
 
+/// Same as `/clans/{clanTag}/members`
+pub fn getClanMembers(
+    capi: *ClazhAPI,
+    tag: []const u8,
+    opts: PagingOptions,
+) !Result.Result(ClanMemberResponse) {
+    const base_url = route ++ "/";
+    const modded_tag = try modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
+    const url = try setupUrl2(capi.gpa, base_url, modded_tag, opts);
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            ClanMemberResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(ClanMemberResponse, capi.gpa, body.written());
+}
+
 /// Same as `/clans/{clanTag}/warlog`
 /// Same as `/clans/{clanTag}/riverracelog`
 /// Same as `/clans/{clanTag}/currentwar`
-/// Same as `/clans/{clanTag}/members`
 /// Same as `/clans/{clanTag}/currentriverrace`
 pub fn voider() void {}
 
@@ -174,4 +210,48 @@ fn modTag(allocator: std.mem.Allocator, tag: []const u8) ![]const u8 {
         return try std.mem.concat(allocator, u8, &.{ hashtag, tag });
     }
     return error.InvalidTag;
+}
+
+fn setupUrl2(
+    allocator: std.mem.Allocator,
+    url: []const u8,
+    tag: []const u8,
+    opts: PagingOptions,
+) ![]const u8 {
+    var buf = std.ArrayList(u8).empty;
+    defer buf.deinit(allocator);
+    const l = "&limit=";
+    const a = "&after=";
+    const b = "&before=";
+    var first = true;
+
+    try buf.appendSlice(allocator, url);
+    try buf.appendSlice(allocator, tag);
+    try buf.appendSlice(allocator, "/members");
+
+    if (opts.limit.len != 0) {
+        if (first) {
+            try buf.appendSlice(allocator, "?");
+            try buf.appendSlice(allocator, l[1..]);
+            first = false;
+        }
+        try buf.appendSlice(allocator, opts.limit);
+    }
+    if (opts.after.len != 0) {
+        if (first) {
+            try buf.appendSlice(allocator, "?");
+            try buf.appendSlice(allocator, a[1..]);
+            first = false;
+        }
+        try buf.appendSlice(allocator, opts.after);
+    }
+    if (opts.before.len != 0) {
+        if (first) {
+            try buf.appendSlice(allocator, "?");
+            try buf.appendSlice(allocator, b[1..]);
+            first = false;
+        }
+        try buf.appendSlice(allocator, opts.before);
+    }
+    return try buf.toOwnedSlice(allocator);
 }

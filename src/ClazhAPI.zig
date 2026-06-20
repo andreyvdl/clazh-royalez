@@ -61,6 +61,7 @@ pub const Role = enums.Role;
 const options = @import("options.zig");
 pub const TournamentsOptions = options.TournamentsOptions;
 pub const ClansOptions = options.ClansOptions;
+pub const PagingOptions = options.PagingOptions;
 
 gpa: mem.Allocator = undefined,
 io: std.Io = undefined,
@@ -178,7 +179,7 @@ pub fn getTournaments(
     if (name.len < 3) return error.NameLessThanThreeCharacters;
 
     var opts = TournamentsOptions{ .must_have = .{ .name = name } };
-    var buf: [65]u8 = undefined;
+    var buf: [16]u8 = undefined;
 
     if (limit) |l| {
         opts.optional.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
@@ -212,10 +213,10 @@ pub fn getClans(
     before: ?[]const u8,
 ) !Result.Result(Response.Response(Clan)) {
     var opts: ClansOptions = undefined;
-    var id_buf: [64]u8 = undefined;
-    var min_buf: [64]u8 = undefined;
-    var max_buf: [64]u8 = undefined;
-    var score_buf: [64]u8 = undefined;
+    var id_buf: [16]u8 = undefined;
+    var min_buf: [16]u8 = undefined;
+    var max_buf: [16]u8 = undefined;
+    var score_buf: [16]u8 = undefined;
     opts.must_have.name = if (name.len > 0) name else "";
     if (location_id == 0) {
         opts.must_have.location_id = "";
@@ -265,8 +266,6 @@ pub fn getClans(
     var buf: [64]u8 = undefined;
     if (limit) |l| {
         opts.optional.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
-    } else {
-        opts.optional.limit = "";
     }
     opts.optional.after = after orelse "";
     opts.optional.before = before orelse "";
@@ -278,4 +277,25 @@ pub fn getClans(
 pub fn getClanByTag(capi: *ClazhAPI, tag: []const u8) !Result.Result(Clan) {
     if (tag.len == 0) return error.InvalidTag;
     return try Clans.getClanByTag(capi, tag);
+}
+
+/// Same as `/clans/{clanTag}/members`
+pub fn getClanMembers(
+    capi: *ClazhAPI,
+    tag: []const u8,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(ClanMember)) {
+    if (tag.len == 0) return error.InvalidTag;
+
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Clans.getClanMembers(capi, tag, opts);
 }
