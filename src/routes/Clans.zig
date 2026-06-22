@@ -8,6 +8,7 @@ const ClansOptions = ClazhAPI.ClansOptions;
 const Clan = ClazhAPI.Clan;
 const ClanMember = ClazhAPI.ClanMember;
 const RiverRaceLogEntry = ClazhAPI.RiverRaceLogEntry;
+const CurrentRiverRace = ClazhAPI.CurrentRiverRace;
 const ClanResponse = Response.Response(Clan);
 const ClanMemberResponse = Response.Response(ClanMember);
 const RiverRaceLogEntryResponse = Response.Response(RiverRaceLogEntry);
@@ -176,7 +177,45 @@ pub fn getClanRiverRaceLog(
     );
 }
 
+/// Same as `/clans/{clanTag}/currentriverrace`
+pub fn getClanCurrentRiverRace(
+    capi: *ClazhAPI,
+    tag: []const u8,
+) !Result.Result(CurrentRiverRace) {
+    const base_url = route ++ "/";
+    const modded_tag = try ClazhAPI.url.modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
+    const url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{ base_url, modded_tag, "/currentriverrace" },
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            CurrentRiverRace,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(CurrentRiverRace, capi.gpa, body.written());
+}
+
 /// Same as `/clans/{clanTag}/warlog`
 /// Same as `/clans/{clanTag}/currentwar`
-/// Same as `/clans/{clanTag}/currentriverrace`
-pub fn voider() void {}
+/// None of these endpoints are active.
+/// war log is temporary and currentwar is permanently returning 404.
+fn @"void"() void {}

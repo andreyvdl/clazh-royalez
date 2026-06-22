@@ -315,3 +315,12 @@ pub fn getClanRiverRaceLog(
     opts.before = before orelse "";
     return try Clans.getClanRiverRaceLog(capi, tag, opts);
 }
+
+/// Same as `/clans/{clanTag}/currentriverrace`
+pub fn getClanCurrentRiverRace(
+    capi: *ClazhAPI,
+    tag: []const u8,
+) !Result.Result(CurrentRiverRace) {
+    if (tag.len == 0) return error.InvalidTag;
+    return try Clans.getClanCurrentRiverRace(capi, tag);
+}

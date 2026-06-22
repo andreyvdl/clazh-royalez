@@ -12,8 +12,8 @@ periodLogs: []PeriodLog,
 periodType: RiverRacePeriodType,
 state: RiverRaceState,
 
-collectionEndTime: []const u8,
-warEndTime: []const u8,
+collectionEndTime: ?[]const u8 = null,
+warEndTime: ?[]const u8 = null,
 
 periodIndex: i64,
 sectionIndex: i64,
