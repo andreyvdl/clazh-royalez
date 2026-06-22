@@ -12,13 +12,10 @@ const std = @import("std");
 
 const route = "https://api.clashroyale.com/v1/players/";
 
-const hashtag = "%23";
-
 /// Same as `/players/{playerTag}`
 pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
-    const modded_tag = try modTag(capi.gpa, tag);
+    const modded_tag = try ClazhAPI.url.modTag(capi.gpa, tag);
     defer capi.gpa.free(modded_tag);
-
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
     const url = try std.mem.concat(
@@ -54,9 +51,8 @@ pub fn getUpcomingChests(
     capi: *ClazhAPI,
     tag: []const u8,
 ) !Result.Result(ChestResponse) {
-    const modded_tag = try modTag(capi.gpa, tag);
+    const modded_tag = try ClazhAPI.url.modTag(capi.gpa, tag);
     defer capi.gpa.free(modded_tag);
-
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
     const url = try std.mem.concat(
@@ -89,7 +85,7 @@ pub fn getBattleLog(
     capi: *ClazhAPI,
     tag: []const u8,
 ) !Result.Result([]Battle) {
-    const modded_tag = try modTag(capi.gpa, tag);
+    const modded_tag = try ClazhAPI.url.modTag(capi.gpa, tag);
     defer capi.gpa.free(modded_tag);
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
@@ -116,13 +112,4 @@ pub fn getBattleLog(
     );
 
     return Result.unmountJSON([]Battle, capi.gpa, body.written());
-}
-
-pub fn modTag(allocator: std.mem.Allocator, tag: []const u8) ![]const u8 {
-    if (tag[0] == '#') {
-        return try std.mem.concat(allocator, u8, &.{ hashtag, tag[1..] });
-    } else if (std.ascii.isAlphanumeric(tag[0])) {
-        return try std.mem.concat(allocator, u8, &.{ hashtag, tag });
-    }
-    return error.InvalidTag;
 }

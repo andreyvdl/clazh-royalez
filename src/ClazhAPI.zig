@@ -46,6 +46,7 @@ pub const TrailEvent = @import("models/TrailEvent.zig");
 
 pub const Result = @import("Result.zig");
 pub const Response = @import("models/internal/Response.zig");
+pub const url = @import("url.zig");
 
 const enums = @import("enums.zig");
 pub const BattleType = enums.BattleType;
@@ -178,14 +179,14 @@ pub fn getTournaments(
 ) !Result.Result(Response.Response(TournamentHeader)) {
     if (name.len < 3) return error.NameLessThanThreeCharacters;
 
-    var opts = TournamentsOptions{ .must_have = .{ .name = name } };
+    var opts = TournamentsOptions{ .name = name };
     var buf: [16]u8 = undefined;
 
     if (limit) |l| {
-        opts.optional.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
     }
-    opts.optional.after = after orelse "";
-    opts.optional.before = before orelse "";
+    opts.after = after orelse "";
+    opts.before = before orelse "";
     return try Tournaments.getTournaments(capi, opts);
 }
 
@@ -212,63 +213,55 @@ pub fn getClans(
     after: ?[]const u8,
     before: ?[]const u8,
 ) !Result.Result(Response.Response(Clan)) {
-    var opts: ClansOptions = undefined;
+    var opts = ClansOptions{};
     var id_buf: [16]u8 = undefined;
     var min_buf: [16]u8 = undefined;
     var max_buf: [16]u8 = undefined;
     var score_buf: [16]u8 = undefined;
-    opts.must_have.name = if (name.len > 0) name else "";
-    if (location_id == 0) {
-        opts.must_have.location_id = "";
-    } else {
-        opts.must_have.location_id = try std.fmt.bufPrint(
+
+    opts.name = if (name.len > 0) name else "";
+    if (location_id != 0) {
+        opts.location_id = try std.fmt.bufPrint(
             &id_buf,
             "{d}",
             .{location_id},
         );
     }
-    if (min_members == 0) {
-        opts.must_have.min_members = "";
-    } else {
-        opts.must_have.min_members = try std.fmt.bufPrint(
+    if (min_members != 0) {
+        opts.min_members = try std.fmt.bufPrint(
             &min_buf,
             "{d}",
             .{min_members},
         );
     }
-    if (max_members == 0) {
-        opts.must_have.max_members = "";
-    } else {
-        opts.must_have.max_members = try std.fmt.bufPrint(
+    if (max_members != 0) {
+        opts.max_members = try std.fmt.bufPrint(
             &max_buf,
             "{d}",
             .{max_members},
         );
     }
-    if (min_score == 0) {
-        opts.must_have.min_score = "";
-    } else {
-        opts.must_have.min_score = try std.fmt.bufPrint(
+    if (min_score != 0) {
+        opts.min_score = try std.fmt.bufPrint(
             &score_buf,
             "{d}",
             .{min_score},
         );
     }
 
-    const musts = opts.must_have;
-    if (musts.name.len == 0 and musts.location_id.len == 0 and
-        musts.min_members.len == 0 and musts.max_members.len == 0 and
-        musts.min_score.len == 0)
+    if (opts.name.len == 0 and opts.location_id.len == 0 and
+        opts.min_members.len == 0 and opts.max_members.len == 0 and
+        opts.min_score.len == 0)
     {
         return error.AllMustOptionsMissing;
     }
 
-    var buf: [64]u8 = undefined;
+    var buf: [16]u8 = undefined;
     if (limit) |l| {
-        opts.optional.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
     }
-    opts.optional.after = after orelse "";
-    opts.optional.before = before orelse "";
+    opts.after = after orelse "";
+    opts.before = before orelse "";
 
     return try Clans.getClans(capi, opts);
 }

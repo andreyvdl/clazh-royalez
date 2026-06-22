@@ -22,7 +22,7 @@ test "player route" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Player-getPlayer] elapsed: {}ms ", .{elapsed});
     switch (player) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -50,7 +50,7 @@ test "player upcoming chests" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Player-getUpcomingChests] elapsed: {}ms ", .{elapsed});
     switch (chests) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -78,7 +78,7 @@ test "player battle log" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Player-getBattleLog] elapsed: {}ms ", .{elapsed});
     switch (log) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -106,7 +106,7 @@ test "cards" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Cards-getCards] elapsed: {}ms ", .{elapsed});
     switch (cards) {
         .success => |c| {
             const items = c.value;
@@ -138,7 +138,7 @@ test "events" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Events-getEvents] elapsed: {}ms ", .{elapsed});
     switch (events) {
         .success => |e| {
             const items = e.value;
@@ -170,7 +170,10 @@ test "global tournaments" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print(
+        "[GlobalTournaments-getGlobalTournaments] elapsed: {}ms ",
+        .{elapsed},
+    );
     switch (tournaments) {
         .success => |t| {
             const items = t.value;
@@ -205,7 +208,10 @@ test "leaderboards" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print(
+        "[Leaderboards-getLeaderboards] elapsed: {}ms ",
+        .{elapsed},
+    );
     switch (leaderboards) {
         .success => |l| {
             const items = l.value;
@@ -248,7 +254,10 @@ test "leaderboards by id" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print(
+        "[Leaderboards-getLeaderboardById] elapsed: {}ms ",
+        .{elapsed},
+    );
     switch (leaderboards) {
         .success => |l| {
             const items = l.value;
@@ -283,7 +292,10 @@ test "tournaments" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print(
+        "[Tournaments-getTournaments] elapsed: {}ms ",
+        .{elapsed},
+    );
     switch (tournaments) {
         .success => |t| {
             std.debug.print(
@@ -317,7 +329,10 @@ test "tournament by tag" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print(
+        "[Tournaments-getTournamentFromTag] elapsed: {}ms ",
+        .{elapsed},
+    );
     switch (tournament) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -345,7 +360,7 @@ test "get clan" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClans] elapsed: {}ms ", .{elapsed});
     switch (clan_list) {
         .success => |c| {
             std.debug.print(
@@ -379,7 +394,7 @@ test "get clan by tag" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClanByTag] elapsed: {}ms ", .{elapsed});
     switch (clan) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -407,7 +422,7 @@ test "get clan members by tag" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClanMembers] elapsed: {}ms ", .{elapsed});
     switch (members) {
         .success => |m| {
             std.debug.print("members len = {d}  ", .{m.value.items.len});
