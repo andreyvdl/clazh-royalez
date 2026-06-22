@@ -38,7 +38,9 @@ pub const PlayerItemLevel = @import("models/PlayerItemLevel.zig");
 pub const PlayerLeagueStatistics =
     @import("models/PlayerLeagueStatistics.zig");
 pub const RiverRaceClan = @import("models/RiverRaceClan.zig");
+pub const RiverRaceLogEntry = @import("models/RiverRaceLogEntry.zig");
 pub const RiverRaceParticipant = @import("models/RiverRaceParticipant.zig");
+pub const RiverRaceStanding = @import("models/RiverRaceStanding.zig");
 pub const Tournament = @import("models/Tournament.zig");
 pub const TournamentHeader = @import("models/TournamentHeader.zig");
 pub const TournamentMember = @import("models/TournamentMember.zig");
@@ -291,4 +293,25 @@ pub fn getClanMembers(
     opts.after = after orelse "";
     opts.before = before orelse "";
     return try Clans.getClanMembers(capi, tag, opts);
+}
+
+/// Same as `/clans/{clanTag}/riverracelog`
+pub fn getClanRiverRaceLog(
+    capi: *ClazhAPI,
+    tag: []const u8,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(RiverRaceLogEntry)) {
+    if (tag.len == 0) return error.InvalidTag;
+
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Clans.getClanRiverRaceLog(capi, tag, opts);
 }

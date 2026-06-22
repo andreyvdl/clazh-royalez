@@ -401,7 +401,7 @@ test "get clan by tag" {
     }
 }
 
-test "get clan members by tag" {
+test "get clan members" {
     const allocator = std.testing.allocator;
     const io = std.testing.io;
     var api: ClazhAPI = undefined;
@@ -426,6 +426,37 @@ test "get clan members by tag" {
     switch (members) {
         .success => |m| {
             std.debug.print("members len = {d}  ", .{m.value.items.len});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
+
+test "get clan river race log" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var log = try api.getClanRiverRaceLog("#RYGVVU29", null, null, null);
+    const end = std.Io.Clock.awake.now(io);
+    defer log.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("[Clans-getClanRiverRaceLog] elapsed: {}ms ", .{elapsed});
+    switch (log) {
+        .success => |l| {
+            std.debug.print("log len = {d}  ", .{l.value.items.len});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),

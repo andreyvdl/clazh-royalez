@@ -7,8 +7,10 @@ const Response = ClazhAPI.Response;
 const ClansOptions = ClazhAPI.ClansOptions;
 const Clan = ClazhAPI.Clan;
 const ClanMember = ClazhAPI.ClanMember;
+const RiverRaceLogEntry = ClazhAPI.RiverRaceLogEntry;
 const ClanResponse = Response.Response(Clan);
 const ClanMemberResponse = Response.Response(ClanMember);
+const RiverRaceLogEntryResponse = Response.Response(RiverRaceLogEntry);
 const PagingOptions = ClazhAPI.PagingOptions;
 
 const std = @import("std");
@@ -125,8 +127,56 @@ pub fn getClanMembers(
     return Result.unmountJSON(ClanMemberResponse, capi.gpa, body.written());
 }
 
-/// Same as `/clans/{clanTag}/warlog`
 /// Same as `/clans/{clanTag}/riverracelog`
+pub fn getClanRiverRaceLog(
+    capi: *ClazhAPI,
+    tag: []const u8,
+    opts: PagingOptions,
+) !Result.Result(RiverRaceLogEntryResponse) {
+    const base_url = route ++ "/";
+    const modded_tag = try ClazhAPI.url.modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
+    const url_tagged = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{ base_url, modded_tag, "/riverracelog" },
+    );
+    defer capi.gpa.free(url_tagged);
+    const url = try ClazhAPI.url.buildQuery(
+        capi.gpa,
+        PagingOptions,
+        opts,
+        url_tagged,
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            RiverRaceLogEntryResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(
+        RiverRaceLogEntryResponse,
+        capi.gpa,
+        body.written(),
+    );
+}
+
+/// Same as `/clans/{clanTag}/warlog`
 /// Same as `/clans/{clanTag}/currentwar`
 /// Same as `/clans/{clanTag}/currentriverrace`
 pub fn voider() void {}
