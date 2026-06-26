@@ -155,16 +155,25 @@ pub fn getLeaderboards(capi: *ClazhAPI) !Result.Result(LeaderboardList) {
     return try Leaderboards.getLeaderboards(capi);
 }
 
-/// Same as `/leaderboards/{leaderboardId}`
-///
-/// It is broken, recommended to use catch and filter for
-/// `error.UnexpectedEndOfInput` just like in tests.
-pub fn getLeaderboardsById(
+/// Same as `/leaderboard/{leaderboardId}`
+pub fn getLeaderboardById(
     capi: *ClazhAPI,
     id: []const u8,
-) !Result.Result(LeaderboardList) {
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(Leaderboard)) {
     if (id.len == 0) return error.InvalidId;
-    return try Leaderboards.getLeaderboardsById(capi, id);
+
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Leaderboards.getLeaderboardById(capi, id, opts);
 }
 
 pub const Tournaments = @import("routes/Tournaments.zig");
@@ -323,4 +332,35 @@ pub fn getClanCurrentRiverRace(
 ) !Result.Result(CurrentRiverRace) {
     if (tag.len == 0) return error.InvalidTag;
     return try Clans.getClanCurrentRiverRace(capi, tag);
+}
+
+const Locations = @import("routes/Locations.zig");
+
+/// Same as `/locations`
+pub fn getLocations(
+    capi: *ClazhAPI,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(Location)) {
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getLocations(capi, opts);
+}
+
+/// Same as `/locations/{locationId}`
+pub fn getLocationById(
+    capi: *ClazhAPI,
+    location_id: u32,
+) !Result.Result(Location) {
+    var buf: [16]u8 = undefined;
+    const li = try std.fmt.bufPrint(&buf, "{d}", .{location_id});
+
+    return try Locations.getLocationById(capi, li);
 }

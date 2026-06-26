@@ -22,7 +22,7 @@ test "player route" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Player-getPlayer] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Player-getPlayer]: {}ms ", .{elapsed});
     switch (player) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -50,7 +50,7 @@ test "player upcoming chests" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Player-getUpcomingChests] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Player-getUpcomingChests]: {}ms ", .{elapsed});
     switch (chests) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -78,7 +78,7 @@ test "player battle log" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Player-getBattleLog] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Player-getBattleLog]: {}ms ", .{elapsed});
     switch (log) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -106,7 +106,7 @@ test "cards" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Cards-getCards] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Cards-getCards]: {}ms ", .{elapsed});
     switch (cards) {
         .success => |c| {
             const items = c.value;
@@ -138,7 +138,7 @@ test "events" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Events-getEvents] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Events-getEvents]: {}ms ", .{elapsed});
     switch (events) {
         .success => |e| {
             const items = e.value;
@@ -171,7 +171,7 @@ test "global tournaments" {
     );
 
     std.debug.print(
-        "[GlobalTournaments-getGlobalTournaments] elapsed: {}ms ",
+        "[GlobalTournaments-getGlobalTournaments]: {}ms ",
         .{elapsed},
     );
     switch (tournaments) {
@@ -209,7 +209,7 @@ test "leaderboards" {
     );
 
     std.debug.print(
-        "[Leaderboards-getLeaderboards] elapsed: {}ms ",
+        "[Leaderboards-getLeaderboards]: {}ms ",
         .{elapsed},
     );
     switch (leaderboards) {
@@ -225,7 +225,7 @@ test "leaderboards" {
     }
 }
 
-test "leaderboards by id" {
+test "leaderboard by id" {
     const allocator = std.testing.allocator;
     const io = std.testing.io;
     var api: ClazhAPI = undefined;
@@ -238,27 +238,19 @@ test "leaderboards by id" {
     defer api.deinit();
 
     const now = std.Io.Clock.awake.now(io);
-    var leaderboards = api.getLeaderboardsById("502514") catch |e| {
-        switch (e) {
-            error.UnexpectedEndOfInput => {
-                std.debug.print("Expected error! shitty api\n", .{});
-                return;
-            },
-            else => return e,
-        }
-    };
+    var leaderboard = try api.getLeaderboardById("502514", null, null, null);
     const end = std.Io.Clock.awake.now(io);
-    defer leaderboards.deinit();
+    defer leaderboard.deinit();
     const elapsed = @divTrunc(
         (end.nanoseconds - now.nanoseconds),
         std.time.ns_per_ms,
     );
 
     std.debug.print(
-        "[Leaderboards-getLeaderboardById] elapsed: {}ms ",
+        "[Leaderboards-getLeaderboardById]: {}ms ",
         .{elapsed},
     );
-    switch (leaderboards) {
+    switch (leaderboard) {
         .success => |l| {
             const items = l.value;
             std.debug.print(
@@ -293,7 +285,7 @@ test "tournaments" {
     );
 
     std.debug.print(
-        "[Tournaments-getTournaments] elapsed: {}ms ",
+        "[Tournaments-getTournaments]: {}ms ",
         .{elapsed},
     );
     switch (tournaments) {
@@ -330,7 +322,7 @@ test "tournament by tag" {
     );
 
     std.debug.print(
-        "[Tournaments-getTournamentFromTag] elapsed: {}ms ",
+        "[Tournaments-getTournamentFromTag]: {}ms ",
         .{elapsed},
     );
     switch (tournament) {
@@ -360,7 +352,7 @@ test "get clan" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Clans-getClans] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClans]: {}ms ", .{elapsed});
     switch (clan_list) {
         .success => |c| {
             std.debug.print(
@@ -394,7 +386,7 @@ test "get clan by tag" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Clans-getClanByTag] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClanByTag]: {}ms ", .{elapsed});
     switch (clan) {
         .success => std.debug.print("OK\n", .{}),
         else => try std.testing.expect(false),
@@ -422,7 +414,7 @@ test "get clan members" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Clans-getClanMembers] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClanMembers]: {}ms ", .{elapsed});
     switch (members) {
         .success => |m| {
             std.debug.print("members len = {d}  ", .{m.value.items.len});
@@ -453,7 +445,7 @@ test "get clan river race log" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Clans-getClanRiverRaceLog] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClanRiverRaceLog]: {}ms ", .{elapsed});
     switch (log) {
         .success => |l| {
             std.debug.print("log len = {d}  ", .{l.value.items.len});
@@ -484,10 +476,72 @@ test "get clan current river race" {
         std.time.ns_per_ms,
     );
 
-    std.debug.print("[Clans-getClanCurrentRiverRace] elapsed: {}ms ", .{elapsed});
+    std.debug.print("[Clans-getClanCurrentRiverRace]: {}ms ", .{elapsed});
     switch (race) {
         .success => |r| {
             std.debug.print("race log len = {d}  ", .{r.value.periodLogs.len});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
+
+test "get location" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var locations = try api.getLocations(null, null, null);
+    const end = std.Io.Clock.awake.now(io);
+    defer locations.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("[Locations-getLocations]: {}ms ", .{elapsed});
+    switch (locations) {
+        .success => |l| {
+            std.debug.print("Location len = {d}  ", .{l.value.items.len});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
+
+test "get location by id" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var location = try api.getLocationById(57000002);
+    const end = std.Io.Clock.awake.now(io);
+    defer location.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("[Locations-getLocationById]: {}ms ", .{elapsed});
+    switch (location) {
+        .success => |l| {
+            std.debug.print("Location name = {s}  ", .{l.value.name});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),
