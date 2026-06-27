@@ -38,6 +38,8 @@ pub const PlayerClan = @import("models/PlayerClan.zig");
 pub const PlayerItemLevel = @import("models/PlayerItemLevel.zig");
 pub const PlayerLeagueStatistics =
     @import("models/PlayerLeagueStatistics.zig");
+pub const PlayerPathOfLegendRanking =
+    @import("models/PlayerPathOfLegendRanking.zig");
 pub const PlayerRanking = @import("models/PlayerRanking.zig");
 pub const PlayerRankingClan = @import("models/PlayerRanking.zig");
 pub const RiverRaceClan = @import("models/RiverRaceClan.zig");
@@ -433,4 +435,24 @@ pub fn getClanWarsRankingsByLocation(
     opts.after = after orelse "";
     opts.before = before orelse "";
     return try Locations.getClanWarsRankingsByLocation(capi, li, opts);
+}
+
+pub fn getPlayersPathOfLegendRankingsByLocation(
+    capi: *ClazhAPI,
+    location_id: u32,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(PlayerPathOfLegendRanking)) {
+    var opts = PagingOptions{};
+    var location_buf: [16]u8 = undefined;
+    var buf: [16]u8 = undefined;
+
+    const li = try std.fmt.bufPrint(&location_buf, "{d}", .{location_id});
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getPlayersPathOfLegendRankingsByLocation(capi, li, opts);
 }

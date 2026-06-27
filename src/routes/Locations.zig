@@ -7,9 +7,12 @@ const Result = ClazhAPI.Result;
 const Location = ClazhAPI.Location;
 const PlayerRanking = ClazhAPI.PlayerRanking;
 const ClanRanking = ClazhAPI.ClanRanking;
+const PlayerPathOfLegendRanking = ClazhAPI.PlayerPathOfLegendRanking;
 const LocationResponse = Response.Response(Location);
 const PlayerRankingResponse = Response.Response(PlayerRanking);
 const ClanRankingResponse = Response.Response(ClanRanking);
+const PlayerPathOfLegendRankingResponse =
+    Response.Response(PlayerPathOfLegendRanking);
 const ClientError = ClazhAPI.ClientError;
 const std = @import("std");
 
@@ -237,11 +240,63 @@ pub fn getClanWarsRankingsByLocation(
     );
 }
 
+/// Same as `/locations/{locationId}/pathoflegend/players`
+///
+/// Seems to work best when used with country location IDs.
+pub fn getPlayersPathOfLegendRankingsByLocation(
+    capi: *ClazhAPI,
+    location_id: []const u8,
+    options: PagingOptions,
+) !Result.Result(PlayerPathOfLegendRankingResponse) {
+    const base_url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{
+            route,
+            "/",
+            location_id,
+            "/pathoflegend/players",
+        },
+    );
+    defer capi.gpa.free(base_url);
+    const url = try ClazhAPI.url.buildQuery(
+        capi.gpa,
+        PagingOptions,
+        options,
+        base_url,
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            PlayerPathOfLegendRankingResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(
+        PlayerPathOfLegendRankingResponse,
+        capi.gpa,
+        body.written(),
+    );
+}
+
 /// Same as `/locations/global/pathoflegend/{seasonId}/rankings/players`
 /// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
 /// Same as `/locations/global/seasons/{seasonId}/rankings/players`
 /// Same as `/locations/global/seasons/{seasonId}`
 /// Same as `/locations/global/seasonsV2`
 /// Same as `/locations/global/seasons`
-/// Same as `/locations/{locationId}/pathoflegend/players`
 fn @"void"() void {}
