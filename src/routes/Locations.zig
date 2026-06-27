@@ -184,6 +184,59 @@ pub fn getClansRankingsByLocation(
     );
 }
 
+/// Same as `/locations/{locationId}/rankings/clanwars`
+///
+/// Seems to work best when used with country location IDs.
+pub fn getClanWarsRankingsByLocation(
+    capi: *ClazhAPI,
+    location_id: []const u8,
+    options: PagingOptions,
+) !Result.Result(ClanRankingResponse) {
+    const base_url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{
+            route,
+            "/",
+            location_id,
+            "/rankings/clanwars",
+        },
+    );
+    defer capi.gpa.free(base_url);
+    const url = try ClazhAPI.url.buildQuery(
+        capi.gpa,
+        PagingOptions,
+        options,
+        base_url,
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            ClanRankingResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(
+        ClanRankingResponse,
+        capi.gpa,
+        body.written(),
+    );
+}
+
 /// Same as `/locations/global/pathoflegend/{seasonId}/rankings/players`
 /// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
 /// Same as `/locations/global/seasons/{seasonId}/rankings/players`
@@ -191,5 +244,4 @@ pub fn getClansRankingsByLocation(
 /// Same as `/locations/global/seasonsV2`
 /// Same as `/locations/global/seasons`
 /// Same as `/locations/{locationId}/pathoflegend/players`
-/// Same as `/locations/{locationId}/rankings/clanwars`
 fn @"void"() void {}

@@ -411,3 +411,26 @@ pub fn getClansRankingsByLocation(
     opts.before = before orelse "";
     return try Locations.getClansRankingsByLocation(capi, li, opts);
 }
+
+/// Same as `/locations/{locationId}/rankings/clanwars`
+///
+/// Seems to work best when used with country location IDs.
+pub fn getClanWarsRankingsByLocation(
+    capi: *ClazhAPI,
+    location_id: u32,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(ClanRanking)) {
+    var opts = PagingOptions{};
+    var location_buf: [16]u8 = undefined;
+    var buf: [16]u8 = undefined;
+
+    const li = try std.fmt.bufPrint(&location_buf, "{d}", .{location_id});
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getClanWarsRankingsByLocation(capi, li, opts);
+}
