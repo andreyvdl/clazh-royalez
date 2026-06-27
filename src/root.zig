@@ -417,7 +417,7 @@ test "get clan members" {
     std.debug.print("[Clans-getClanMembers]: {}ms ", .{elapsed});
     switch (members) {
         .success => |m| {
-            std.debug.print("members len = {d}  ", .{m.value.items.len});
+            std.debug.print("members len = {d} ", .{m.value.items.len});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),
@@ -448,7 +448,7 @@ test "get clan river race log" {
     std.debug.print("[Clans-getClanRiverRaceLog]: {}ms ", .{elapsed});
     switch (log) {
         .success => |l| {
-            std.debug.print("log len = {d}  ", .{l.value.items.len});
+            std.debug.print("log len = {d} ", .{l.value.items.len});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),
@@ -479,7 +479,7 @@ test "get clan current river race" {
     std.debug.print("[Clans-getClanCurrentRiverRace]: {}ms ", .{elapsed});
     switch (race) {
         .success => |r| {
-            std.debug.print("race log len = {d}  ", .{r.value.periodLogs.len});
+            std.debug.print("race log len = {d} ", .{r.value.periodLogs.len});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),
@@ -510,7 +510,7 @@ test "get location" {
     std.debug.print("[Locations-getLocations]: {}ms ", .{elapsed});
     switch (locations) {
         .success => |l| {
-            std.debug.print("Location len = {d}  ", .{l.value.items.len});
+            std.debug.print("Location len = {d} ", .{l.value.items.len});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),
@@ -541,7 +541,46 @@ test "get location by id" {
     std.debug.print("[Locations-getLocationById]: {}ms ", .{elapsed});
     switch (location) {
         .success => |l| {
-            std.debug.print("Location name = {s}  ", .{l.value.name});
+            std.debug.print("Location name = {s} ", .{l.value.name});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
+
+test "get location players ranking by id" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var rankings = try api.getPlayersRankingsByLocation(
+        57000047,
+        null,
+        null,
+        null,
+    );
+    const end = std.Io.Clock.awake.now(io);
+    defer rankings.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print(
+        "[Locations-getPlayersRankingsByLocation]: {}ms ",
+        .{elapsed},
+    );
+    switch (rankings) {
+        .success => |r| {
+            std.debug.print("Rankings len = {d} ", .{r.value.items.len});
             std.debug.print("OK\n", .{});
         },
         else => try std.testing.expect(false),

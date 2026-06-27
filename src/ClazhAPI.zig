@@ -37,6 +37,8 @@ pub const PlayerClan = @import("models/PlayerClan.zig");
 pub const PlayerItemLevel = @import("models/PlayerItemLevel.zig");
 pub const PlayerLeagueStatistics =
     @import("models/PlayerLeagueStatistics.zig");
+pub const PlayerRanking = @import("models/PlayerRanking.zig");
+pub const PlayerRankingClan = @import("models/PlayerRanking.zig");
 pub const RiverRaceClan = @import("models/RiverRaceClan.zig");
 pub const RiverRaceLogEntry = @import("models/RiverRaceLogEntry.zig");
 pub const RiverRaceParticipant = @import("models/RiverRaceParticipant.zig");
@@ -363,4 +365,27 @@ pub fn getLocationById(
     const li = try std.fmt.bufPrint(&buf, "{d}", .{location_id});
 
     return try Locations.getLocationById(capi, li);
+}
+
+/// Same as `/locations/{locationId}/rankings/players`
+///
+/// Seems to work best when used with country location IDs.
+pub fn getPlayersRankingsByLocation(
+    capi: *ClazhAPI,
+    location_id: u32,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(PlayerRanking)) {
+    var opts = PagingOptions{};
+    var location_buf: [16]u8 = undefined;
+    var buf: [16]u8 = undefined;
+
+    const li = try std.fmt.bufPrint(&location_buf, "{d}", .{location_id});
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getPlayersRankingsByLocation(capi, li, opts);
 }

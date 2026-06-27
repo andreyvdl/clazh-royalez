@@ -1,7 +1,5 @@
 pub const Leaderboard = @This();
 
-const std = @import("std");
-
 const LeaderboardClan = @import("LeaderboardClan.zig");
 
 id: ?i64 = null,

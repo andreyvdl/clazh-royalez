@@ -11,105 +11,68 @@ pub fn modTag(allocator: std.mem.Allocator, tag: []const u8) ![]const u8 {
 
 pub fn buildQuery(
     allocator: std.mem.Allocator,
-    OptionsType: type,
+    comptime OptionsType: type,
     options: OptionsType,
     url: []const u8,
 ) ![]const u8 {
     const query_marker = '?';
     const and_marker = '&';
+    var first = true;
     var buf = std.ArrayList(u8).empty;
     defer buf.deinit(allocator);
-    var first = true;
 
     try buf.appendSlice(allocator, url);
 
-    if (@hasField(OptionsType, "name") and options.name.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "name=");
-        try buf.appendSlice(allocator, options.name);
-    }
+    inline for (comptime std.meta.fieldNames(OptionsType)) |field| {
+        const value = @field(options, field);
 
-    if (@hasField(OptionsType, "limit") and options.limit.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
+        if (value.len > 0) {
+            if (first) {
+                try buf.append(allocator, query_marker);
+                first = false;
+            } else {
+                try buf.append(allocator, and_marker);
+            }
+            try buf.appendSlice(
+                allocator,
+                QueryField.snakeCase2CamelCase(field),
+            );
+            try buf.append(allocator, '=');
+            try buf.appendSlice(allocator, value);
         }
-        try buf.appendSlice(allocator, "limit=");
-        try buf.appendSlice(allocator, options.limit);
-    }
-
-    if (@hasField(OptionsType, "after") and options.after.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "after=");
-        try buf.appendSlice(allocator, options.after);
-    }
-
-    if (@hasField(OptionsType, "before") and options.before.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "before=");
-        try buf.appendSlice(allocator, options.before);
-    }
-
-    if (@hasField(OptionsType, "location_id") and options.location_id.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "locationId=");
-        try buf.appendSlice(allocator, options.location_id);
-    }
-
-    if (@hasField(OptionsType, "min_members") and options.min_members.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "minMembers=");
-        try buf.appendSlice(allocator, options.min_members);
-    }
-
-    if (@hasField(OptionsType, "max_members") and options.max_members.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "maxMembers=");
-        try buf.appendSlice(allocator, options.max_members);
-    }
-
-    if (@hasField(OptionsType, "min_score") and options.min_score.len > 0) {
-        if (first) {
-            try buf.append(allocator, query_marker);
-            first = false;
-        } else {
-            try buf.append(allocator, and_marker);
-        }
-        try buf.appendSlice(allocator, "minScore=");
-        try buf.appendSlice(allocator, options.min_score);
     }
 
     return try buf.toOwnedSlice(allocator);
 }
+
+pub const QueryField = enum {
+    locationId,
+    minMembers,
+    maxMembers,
+    minScore,
+    name,
+    limit,
+    after,
+    before,
+
+    pub fn snakeCase2CamelCase(comptime str: []const u8) []const u8 {
+        const strs = [_][]const u8{
+            "location_id",
+            "min_members",
+            "max_members",
+            "min_score",
+            "name",
+            "limit",
+            "after",
+            "before",
+            "",
+        };
+
+        for (0..strs.len) |i| {
+            if (std.mem.eql(u8, str, strs[i])) {
+                return @typeInfo(@This()).@"enum".fields[i].name;
+            }
+        }
+        return strs[strs.len - 1];
+    }
+};
