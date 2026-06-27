@@ -8,11 +8,13 @@ const Location = ClazhAPI.Location;
 const PlayerRanking = ClazhAPI.PlayerRanking;
 const ClanRanking = ClazhAPI.ClanRanking;
 const PlayerPathOfLegendRanking = ClazhAPI.PlayerPathOfLegendRanking;
+const LeagueSeason = ClazhAPI.LeagueSeason;
 const LocationResponse = Response.Response(Location);
 const PlayerRankingResponse = Response.Response(PlayerRanking);
 const ClanRankingResponse = Response.Response(ClanRanking);
 const PlayerPathOfLegendRankingResponse =
     Response.Response(PlayerPathOfLegendRanking);
+const LeagueSeasonResponse = Response.Response(LeagueSeason);
 const ClientError = ClazhAPI.ClientError;
 const std = @import("std");
 
@@ -293,10 +295,42 @@ pub fn getPlayersPathOfLegendRankingsByLocation(
     );
 }
 
+/// Same as `/locations/global/seasons`
+pub fn getGlobalSeasonsV1(
+    capi: *ClazhAPI,
+) !Result.Result(LeagueSeasonResponse) {
+    const url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{ route, "/global/seasons" },
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            LeagueSeasonResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(LeagueSeasonResponse, capi.gpa, body.written());
+}
+
 /// Same as `/locations/global/pathoflegend/{seasonId}/rankings/players`
 /// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
 /// Same as `/locations/global/seasons/{seasonId}/rankings/players`
 /// Same as `/locations/global/seasons/{seasonId}`
 /// Same as `/locations/global/seasonsV2`
-/// Same as `/locations/global/seasons`
 fn @"void"() void {}

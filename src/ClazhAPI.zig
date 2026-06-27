@@ -20,6 +20,7 @@ pub const LadderTournament = @import("models/LadderTournament.zig");
 pub const LadderTournamentList = @import("models/LadderTournamentList.zig");
 pub const Leaderboard = @import("models/Leaderboard.zig");
 pub const LeaderboardList = @import("models/LeaderboardList.zig");
+pub const LeagueSeason = @import("models/LeagueSeason.zig");
 pub const LeagueSeasonResult = @import("models/LeagueSeasonResult.zig");
 pub const Location = @import("models/Location.zig");
 pub const PathOfLegendSeasonResult =
@@ -455,4 +456,11 @@ pub fn getPlayersPathOfLegendRankingsByLocation(
     opts.after = after orelse "";
     opts.before = before orelse "";
     return try Locations.getPlayersPathOfLegendRankingsByLocation(capi, li, opts);
+}
+
+/// Same as `/locations/global/seasons`
+pub fn getGlobalSeasonsV1(
+    capi: *ClazhAPI,
+) !Result.Result(Response.Response(LeagueSeason)) {
+    return try Locations.getGlobalSeasonsV1(capi);
 }
