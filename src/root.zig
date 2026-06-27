@@ -734,3 +734,34 @@ test "get location global seasons V1" {
         else => try std.testing.expect(false),
     }
 }
+
+test "get location global seasons V2" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var seasons = try api.getGlobalSeasonsV2();
+    const end = std.Io.Clock.awake.now(io);
+    defer seasons.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("[Locations-getGlobalSeasonsV2]: {}ms ", .{elapsed});
+    switch (seasons) {
+        .success => |s| {
+            std.debug.print("Seasons len = {d} ", .{s.value.items.len});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}

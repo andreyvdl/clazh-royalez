@@ -464,3 +464,12 @@ pub fn getGlobalSeasonsV1(
 ) !Result.Result(Response.Response(LeagueSeason)) {
     return try Locations.getGlobalSeasonsV1(capi);
 }
+
+/// Same as `/locations/global/seasonsV2`
+///
+/// This route only returns null values, use V1 instead.
+pub fn getGlobalSeasonsV2(
+    capi: *ClazhAPI,
+) !Result.Result(Response.Response(LeagueSeason)) {
+    return try Locations.getGlobalSeasonsV2(capi);
+}
