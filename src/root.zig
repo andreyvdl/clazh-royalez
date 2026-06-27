@@ -586,3 +586,42 @@ test "get location players ranking by id" {
         else => try std.testing.expect(false),
     }
 }
+
+test "get location clans ranking by id" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var rankings = try api.getClansRankingsByLocation(
+        57000002,
+        null,
+        null,
+        null,
+    );
+    const end = std.Io.Clock.awake.now(io);
+    defer rankings.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print(
+        "[Locations-getClansRankingsByLocation]: {}ms ",
+        .{elapsed},
+    );
+    switch (rankings) {
+        .success => |r| {
+            std.debug.print("Rankings len = {d} ", .{r.value.items.len});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
