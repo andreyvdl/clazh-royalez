@@ -18,6 +18,8 @@ pub const Item = @import("models/Item.zig");
 pub const ItemList = @import("models/ItemList.zig");
 pub const LadderTournament = @import("models/LadderTournament.zig");
 pub const LadderTournamentList = @import("models/LadderTournamentList.zig");
+pub const LadderTournamentRanking =
+    @import("models/LadderTournamentRanking.zig");
 pub const Leaderboard = @import("models/Leaderboard.zig");
 pub const LeaderboardList = @import("models/LeaderboardList.zig");
 pub const LeagueSeason = @import("models/LeagueSeason.zig");
@@ -493,6 +495,8 @@ pub fn getPlayersPathOfLegendRankingsBySeasonId(
     after: ?[]const u8,
     before: ?[]const u8,
 ) !Result.Result(Response.Response(PlayerPathOfLegendRanking)) {
+    if (season_id.len == 0) return error.InvalidSeasonId;
+
     var opts = PagingOptions{};
     var buf: [16]u8 = undefined;
 
@@ -516,6 +520,8 @@ pub fn getPlayersSeasonRankingsBySeasonId(
     after: ?[]const u8,
     before: ?[]const u8,
 ) !Result.Result(Response.Response(PlayerRanking)) {
+    if (season_id.len == 0) return error.InvalidSeasonId;
+
     var opts = PagingOptions{};
     var buf: [16]u8 = undefined;
 
@@ -527,6 +533,33 @@ pub fn getPlayersSeasonRankingsBySeasonId(
     return try Locations.getPlayersSeasonRankingsBySeasonId(
         capi,
         season_id,
+        opts,
+    );
+}
+
+/// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
+///
+/// Only works for global tournaments.
+pub fn getGlobalTournamentRankingsByTag(
+    capi: *ClazhAPI,
+    tag: []const u8,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(LadderTournamentRanking)) {
+    if (tag.len < 3) return error.InvalidTag;
+
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getGlobalTournamentRankingsByTag(
+        capi,
+        tag,
         opts,
     );
 }

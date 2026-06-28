@@ -9,12 +9,15 @@ const PlayerRanking = ClazhAPI.PlayerRanking;
 const ClanRanking = ClazhAPI.ClanRanking;
 const PlayerPathOfLegendRanking = ClazhAPI.PlayerPathOfLegendRanking;
 const LeagueSeason = ClazhAPI.LeagueSeason;
+const LadderTournamentRanking = ClazhAPI.LadderTournamentRanking;
 const LocationResponse = Response.Response(Location);
 const PlayerRankingResponse = Response.Response(PlayerRanking);
 const ClanRankingResponse = Response.Response(ClanRanking);
 const PlayerPathOfLegendRankingResponse =
     Response.Response(PlayerPathOfLegendRanking);
 const LeagueSeasonResponse = Response.Response(LeagueSeason);
+const LadderTournamentRankingResponse =
+    Response.Response(LadderTournamentRanking);
 const ClientError = ClazhAPI.ClientError;
 const std = @import("std");
 
@@ -502,4 +505,51 @@ pub fn getPlayersSeasonRankingsBySeasonId(
 }
 
 /// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
-fn @"void"() void {}
+///
+/// Only works for global tournaments.
+pub fn getGlobalTournamentRankingsByTag(
+    capi: *ClazhAPI,
+    tag: []const u8,
+    options: PagingOptions,
+) !Result.Result(LadderTournamentRankingResponse) {
+    const modded_tag = try ClazhAPI.url.modTag(capi.gpa, tag);
+    defer capi.gpa.free(modded_tag);
+    const base_url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{ route, "/global/rankings/tournaments/", modded_tag },
+    );
+    defer capi.gpa.free(base_url);
+    const url = try ClazhAPI.url.buildQuery(
+        capi.gpa,
+        PagingOptions,
+        options,
+        base_url,
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            LadderTournamentRankingResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(
+        LadderTournamentRankingResponse,
+        capi.gpa,
+        body.written(),
+    );
+}

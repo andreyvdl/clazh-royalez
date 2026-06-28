@@ -874,3 +874,42 @@ test "get location players season ranking by season id" {
         else => try std.testing.expect(false),
     }
 }
+
+test "get location global tournament ranking by tag" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var rankings = try api.getGlobalTournamentRankingsByTag(
+        "4206967",
+        null,
+        null,
+        null,
+    );
+    const end = std.Io.Clock.awake.now(io);
+    defer rankings.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print(
+        "[Locations-getGlobalTournamentRankingsByTag]: {}ms ",
+        .{elapsed},
+    );
+    switch (rankings) {
+        .fail => {
+            std.debug.print("Fail expected, needs valid tag ", .{});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
