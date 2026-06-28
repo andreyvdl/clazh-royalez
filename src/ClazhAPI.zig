@@ -485,3 +485,25 @@ pub fn getSeasonBySeasonId(
     return try Locations.getSeasonBySeasonId(capi, season_id);
 }
 
+/// Same as `/locations/global/pathoflegend/{seasonId}/rankings/players`
+pub fn getPlayersPathOfLegendRankingsBySeasonId(
+    capi: *ClazhAPI,
+    season_id: []const u8,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(PlayerPathOfLegendRanking)) {
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getPlayersPathOfLegendRankingsBySeasonId(
+        capi,
+        season_id,
+        opts,
+    );
+}
