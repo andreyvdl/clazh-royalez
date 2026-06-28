@@ -926,4 +926,61 @@ test "get location global tournament ranking by tag" {
 //     );
 //     defer api.deinit();
 
+//     var cards = try api.getCards();
+//     defer cards.deinit();
+
+//     switch (cards) {
+//         .success => |c| {
+//             var buf: [1024]u8 = undefined;
+//             const file = try std.Io.Dir.cwd().createFile(
+//                 api.io,
+//                 "cards data.txt",
+//                 .{},
+//             );
+//             defer file.close(api.io);
+
+//             for (c.value.items) |card| {
+//                 const b = try std.fmt.bufPrint(
+//                     &buf,
+//                     "\"{s}\" = {d},\n",
+//                     .{ card.name, card.id },
+//                 );
+//                 try file.writeStreamingAll(api.io, b);
+//             }
+//             for (c.value.supportItems) |card| {
+//                 const b = try std.fmt.bufPrint(
+//                     &buf,
+//                     "\"{s}\" = {d},\n",
+//                     .{ card.name, card.id },
+//                 );
+//                 try file.writeStreamingAll(api.io, b);
+//             }
+//         },
+//         .fail => try std.testing.expect(false),
+//     }
+
+//     var locations = try api.getLocations(null, null, null);
+//     defer locations.deinit();
+
+//     switch (locations) {
+//         .success => |l| {
+//             var buf: [1024]u8 = undefined;
+//             const file = try std.Io.Dir.cwd().createFile(
+//                 api.io,
+//                 "locations data.txt",
+//                 .{},
+//             );
+//             defer file.close(api.io);
+
+//             for (l.value.items) |location| {
+//                 const b = try std.fmt.bufPrint(
+//                     &buf,
+//                     "\"{s}\" = {d},\n",
+//                     .{ location.name, location.id },
+//                 );
+//                 try file.writeStreamingAll(api.io, b);
+//             }
+//         },
+//         .fail => try std.testing.expect(false),
+//     }
 // }
