@@ -363,8 +363,43 @@ pub fn getGlobalSeasonsV2(
     return Result.unmountJSON(LeagueSeasonResponse, capi.gpa, body.written());
 }
 
+/// Same as `/locations/global/seasons/{seasonId}`
+///
+/// Returned season is in V1 style.
+pub fn getSeasonBySeasonId(
+    capi: *ClazhAPI,
+    season_id: []const u8,
+) !Result.Result(LeagueSeason) {
+    const url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{ route, "/global/seasons/", season_id },
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            LeagueSeason,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(LeagueSeason, capi.gpa, body.written());
+}
+
 /// Same as `/locations/global/pathoflegend/{seasonId}/rankings/players`
 /// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
 /// Same as `/locations/global/seasons/{seasonId}/rankings/players`
-/// Same as `/locations/global/seasons/{seasonId}`
 fn @"void"() void {}

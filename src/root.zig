@@ -765,3 +765,35 @@ test "get location global seasons V2" {
         else => try std.testing.expect(false),
     }
 }
+
+test "get location season by season id" {
+    const allocator = std.testing.allocator;
+    const io = std.testing.io;
+    var api: ClazhAPI = undefined;
+
+    try api.init(
+        allocator,
+        io,
+        std.testing.environ.getPosix("TOKEN") orelse "",
+    );
+    defer api.deinit();
+
+    const now = std.Io.Clock.awake.now(io);
+    var season = try api.getSeasonBySeasonId("2022-02");
+    const end = std.Io.Clock.awake.now(io);
+    defer season.deinit();
+    const elapsed = @divTrunc(
+        (end.nanoseconds - now.nanoseconds),
+        std.time.ns_per_ms,
+    );
+
+    std.debug.print("[Locations-getSeasonBySeasonId]: {}ms ", .{elapsed});
+    switch (season) {
+        .success => |s| {
+            std.debug.print("Season id = {s} ", .{s.value.id.?});
+            std.debug.print("OK\n", .{});
+        },
+        else => try std.testing.expect(false),
+    }
+}
+

@@ -182,7 +182,7 @@ pub fn getLeaderboardById(
     return try Leaderboards.getLeaderboardById(capi, id, opts);
 }
 
-pub const Tournaments = @import("routes/Tournaments.zig");
+const Tournaments = @import("routes/Tournaments.zig");
 
 /// Same as `/tournaments?name={name}[&limit=int&after=str&before=str]`
 ///
@@ -473,3 +473,15 @@ pub fn getGlobalSeasonsV2(
 ) !Result.Result(Response.Response(LeagueSeason)) {
     return try Locations.getGlobalSeasonsV2(capi);
 }
+
+/// Same as `/locations/global/seasons/{seasonId}`
+///
+/// Returned season is in V1 style.
+pub fn getSeasonBySeasonId(
+    capi: *ClazhAPI,
+    season_id: []const u8,
+) !Result.Result(LeagueSeason) {
+    if (season_id.len == 0) return error.InvalidSeasonId;
+    return try Locations.getSeasonBySeasonId(capi, season_id);
+}
+
