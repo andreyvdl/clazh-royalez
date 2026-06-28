@@ -10,7 +10,6 @@ members: i64,
 previousRank: i64,
 rank: i64,
 
-badgeUrls: ?std.json.Value = null,
 location: Location,
 
 name: []const u8,

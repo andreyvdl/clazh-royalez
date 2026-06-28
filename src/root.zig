@@ -913,3 +913,17 @@ test "get location global tournament ranking by tag" {
         else => try std.testing.expect(false),
     }
 }
+
+// test "Get enums values" {
+//     const allocator = std.testing.allocator;
+//     const io = std.testing.io;
+//     var api: ClazhAPI = undefined;
+
+//     try api.init(
+//         allocator,
+//         io,
+//         std.testing.environ.getPosix("TOKEN") orelse "",
+//     );
+//     defer api.deinit();
+
+// }

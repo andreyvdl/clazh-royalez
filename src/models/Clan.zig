@@ -19,8 +19,6 @@ donationsPerWeek: i64,
 members: i64,
 requiredTrophies: i64,
 
-badgeUrls: ?std.json.Value = null,
-
 clanChestStatus: ?ClanChestStatus = null,
 location: Location,
 memberList: ?[]ClanMember = null,
