@@ -507,3 +507,26 @@ pub fn getPlayersPathOfLegendRankingsBySeasonId(
         opts,
     );
 }
+
+/// Same as `/locations/global/seasons/{seasonId}/rankings/players`
+pub fn getPlayersSeasonRankingsBySeasonId(
+    capi: *ClazhAPI,
+    season_id: []const u8,
+    limit: ?u32,
+    after: ?[]const u8,
+    before: ?[]const u8,
+) !Result.Result(Response.Response(PlayerRanking)) {
+    var opts = PagingOptions{};
+    var buf: [16]u8 = undefined;
+
+    if (limit) |l| {
+        opts.limit = try std.fmt.bufPrint(&buf, "{d}", .{l});
+    }
+    opts.after = after orelse "";
+    opts.before = before orelse "";
+    return try Locations.getPlayersSeasonRankingsBySeasonId(
+        capi,
+        season_id,
+        opts,
+    );
+}

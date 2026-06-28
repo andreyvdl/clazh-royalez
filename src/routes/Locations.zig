@@ -450,6 +450,56 @@ pub fn getPlayersPathOfLegendRankingsBySeasonId(
     );
 }
 
-/// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
 /// Same as `/locations/global/seasons/{seasonId}/rankings/players`
+pub fn getPlayersSeasonRankingsBySeasonId(
+    capi: *ClazhAPI,
+    season_id: []const u8,
+    options: PagingOptions,
+) !Result.Result(PlayerRankingResponse) {
+    const base_url = try std.mem.concat(
+        capi.gpa,
+        u8,
+        &.{
+            route,
+            "/global/seasons/",
+            season_id,
+            "/rankings/players",
+        },
+    );
+    defer capi.gpa.free(base_url);
+    const url = try ClazhAPI.url.buildQuery(
+        capi.gpa,
+        PagingOptions,
+        options,
+        base_url,
+    );
+    defer capi.gpa.free(url);
+    var body = std.Io.Writer.Allocating.init(capi.gpa);
+    defer body.deinit();
+
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            PlayerRankingResponse,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(
+        PlayerRankingResponse,
+        capi.gpa,
+        body.written(),
+    );
+}
+
+/// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
 fn @"void"() void {}
