@@ -9,6 +9,13 @@ pub fn modTag(allocator: std.mem.Allocator, tag: []const u8) ![]const u8 {
     return error.InvalidTag;
 }
 
+const map = std.StaticStringMap([]const u8).initComptime(.{
+    .{ "location_id", "locationId" },
+    .{ "min_members", "minMembers" },
+    .{ "max_members", "maxMembers" },
+    .{ "min_score", "minScore" },
+});
+
 pub fn buildQuery(
     allocator: std.mem.Allocator,
     comptime OptionsType: type,
@@ -35,7 +42,7 @@ pub fn buildQuery(
             }
             try buf.appendSlice(
                 allocator,
-                QueryField.snakeCase2CamelCase(field),
+                map.get(field) orelse field,
             );
             try buf.append(allocator, '=');
             try buf.appendSlice(allocator, value);
@@ -44,38 +51,6 @@ pub fn buildQuery(
 
     return try buf.toOwnedSlice(allocator);
 }
-
-pub const QueryField = enum {
-    locationId,
-    minMembers,
-    maxMembers,
-    minScore,
-    name,
-    limit,
-    after,
-    before,
-
-    pub fn snakeCase2CamelCase(comptime str: []const u8) []const u8 {
-        const strs = [_][]const u8{
-            "location_id",
-            "min_members",
-            "max_members",
-            "min_score",
-            "name",
-            "limit",
-            "after",
-            "before",
-            "",
-        };
-
-        for (0..strs.len) |i| {
-            if (std.mem.eql(u8, str, strs[i])) {
-                return @typeInfo(@This()).@"enum".fields[i].name;
-            }
-        }
-        return strs[strs.len - 1];
-    }
-};
 
 const ClazhAPI = @import("ClazhAPI.zig");
 const Result = ClazhAPI.Result;
