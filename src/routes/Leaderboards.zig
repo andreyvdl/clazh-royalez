@@ -20,22 +20,12 @@ pub fn getLeaderboards(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = "https://api.clashroyale.com/v1/leaderboards" },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) return Result.Failed(
+    return try ClazhAPI.url.fetch(
         LeaderboardList,
-        try ClientError.fromJSON(capi.gpa, body.written()),
+        capi,
+        "https://api.clashroyale.com/v1/leaderboards",
+        &body,
     );
-
-    return Result.unmountJSON(LeaderboardList, capi.gpa, body.written());
 }
 
 /// Same as `/leaderboard/{leaderboardId}`
@@ -56,22 +46,5 @@ pub fn getLeaderboardById(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            LeaderboardResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(LeaderboardResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(LeaderboardResponse, capi, url, &body);
 }

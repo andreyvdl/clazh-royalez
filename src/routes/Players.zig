@@ -25,22 +25,7 @@ pub fn getPlayer(capi: *ClazhAPI, tag: []const u8) !Result.Result(Player) {
     );
     defer capi.gpa.free(url);
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) return Result.Failed(
-        Player,
-        try ClientError.fromJSON(capi.gpa, body.written()),
-    );
-
-    return Result.unmountJSON(Player, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(Player, capi, url, &body);
 }
 
 /// Same as `/players/{playerTag}/upcomingchests`
@@ -62,22 +47,7 @@ pub fn getUpcomingChests(
     );
     defer capi.gpa.free(url);
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) return Result.Failed(
-        ChestResponse,
-        try ClientError.fromJSON(capi.gpa, body.written()),
-    );
-
-    return Result.unmountJSON(ChestResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(ChestResponse, capi, url, &body);
 }
 
 /// Same as `/players/{playerTag}/battlelog`
@@ -96,20 +66,5 @@ pub fn getBattleLog(
     );
     defer capi.gpa.free(url);
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) return Result.Failed(
-        []Battle,
-        try ClientError.fromJSON(capi.gpa, body.written()),
-    );
-
-    return Result.unmountJSON([]Battle, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch([]Battle, capi, url, &body);
 }

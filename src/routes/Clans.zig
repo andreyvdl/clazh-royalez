@@ -33,24 +33,7 @@ pub fn getClans(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            ClanResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(ClanResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(ClanResponse, capi, url, &body);
 }
 
 /// Same as `/clans/{clanTag}`
@@ -63,24 +46,7 @@ pub fn getClanByTag(capi: *ClazhAPI, tag: []const u8) !Result.Result(Clan) {
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            Clan,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(Clan, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(Clan, capi, url, &body);
 }
 
 /// Same as `/clans/{clanTag}/members`
@@ -108,24 +74,7 @@ pub fn getClanMembers(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            ClanMemberResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(ClanMemberResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(ClanMemberResponse, capi, url, &body);
 }
 
 /// Same as `/clans/{clanTag}/riverracelog`
@@ -153,27 +102,11 @@ pub fn getClanRiverRaceLog(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            RiverRaceLogEntryResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
+    return try ClazhAPI.url.fetch(
         RiverRaceLogEntryResponse,
-        capi.gpa,
-        body.written(),
+        capi,
+        url,
+        &body,
     );
 }
 
@@ -194,24 +127,7 @@ pub fn getClanCurrentRiverRace(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            CurrentRiverRace,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(CurrentRiverRace, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(CurrentRiverRace, capi, url, &body);
 }
 
 /// Same as `/clans/{clanTag}/warlog`

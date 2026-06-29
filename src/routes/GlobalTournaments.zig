@@ -16,24 +16,5 @@ pub fn getGlobalTournaments(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = route },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) return Result.Failed(
-        LadderTournamentList,
-        try ClientError.fromJSON(capi.gpa, body.written()),
-    );
-
-    return Result.unmountJSON(
-        LadderTournamentList,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(LadderTournamentList, capi, route, &body);
 }

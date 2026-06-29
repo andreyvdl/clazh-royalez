@@ -76,3 +76,33 @@ pub const QueryField = enum {
         return strs[strs.len - 1];
     }
 };
+
+const ClazhAPI = @import("ClazhAPI.zig");
+const Result = ClazhAPI.Result;
+const ClientError = ClazhAPI.ClientError;
+
+pub fn fetch(
+    comptime T: type,
+    capi: *ClazhAPI,
+    url: []const u8,
+    body: *std.Io.Writer.Allocating,
+) !Result.Result(T) {
+    const res = try capi.client.fetch(.{
+        .method = .GET,
+        .location = .{ .url = url },
+        .headers = .{
+            .authorization = .{ .override = capi.token },
+        },
+        .response_writer = &body.writer,
+        .keep_alive = false,
+    });
+
+    if (res.status != .ok) {
+        return Result.Failed(
+            T,
+            try ClientError.fromJSON(capi.gpa, body.written()),
+        );
+    }
+
+    return Result.unmountJSON(T, capi.gpa, body.written());
+}

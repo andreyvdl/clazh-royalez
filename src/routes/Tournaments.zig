@@ -28,28 +28,7 @@ pub fn getTournaments(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            TournamentHeaderResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
-        TournamentHeaderResponse,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(TournamentHeaderResponse, capi, url, &body);
 }
 
 /// Same as `/tournaments/{tournamentTag}`
@@ -64,26 +43,5 @@ pub fn getTournamentFromTag(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            Tournament,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
-        Tournament,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(Tournament, capi, url, &body);
 }

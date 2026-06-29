@@ -38,24 +38,7 @@ pub fn getLocations(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            LocationResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(LocationResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(LocationResponse, capi, url, &body);
 }
 
 /// Same as `/locations/{locationId}`
@@ -68,24 +51,7 @@ pub fn getLocationById(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            Location,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(Location, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(Location, capi, url, &body);
 }
 
 /// Same as `/locations/{locationId}/rankings/players`
@@ -117,28 +83,7 @@ pub fn getPlayersRankingsByLocation(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            PlayerRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
-        PlayerRankingResponse,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(PlayerRankingResponse, capi, url, &body);
 }
 
 /// Same as `/locations/{locationId}/rankings/clans`
@@ -168,28 +113,7 @@ pub fn getClansRankingsByLocation(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            ClanRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
-        ClanRankingResponse,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(ClanRankingResponse, capi, url, &body);
 }
 
 /// Same as `/locations/{locationId}/rankings/clanwars`
@@ -221,28 +145,7 @@ pub fn getClanWarsRankingsByLocation(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            ClanRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
-        ClanRankingResponse,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(ClanRankingResponse, capi, url, &body);
 }
 
 /// Same as `/locations/{locationId}/pathoflegend/players`
@@ -274,27 +177,11 @@ pub fn getPlayersPathOfLegendRankingsByLocation(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            PlayerPathOfLegendRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
+    return try ClazhAPI.url.fetch(
         PlayerPathOfLegendRankingResponse,
-        capi.gpa,
-        body.written(),
+        capi,
+        url,
+        &body,
     );
 }
 
@@ -311,24 +198,7 @@ pub fn getGlobalSeasonsV1(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            LeagueSeasonResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(LeagueSeasonResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(LeagueSeasonResponse, capi, url, &body);
 }
 
 /// Same as `/locations/global/seasonsV2`
@@ -346,24 +216,7 @@ pub fn getGlobalSeasonsV2(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            LeagueSeasonResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(LeagueSeasonResponse, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(LeagueSeasonResponse, capi, url, &body);
 }
 
 /// Same as `/locations/global/seasons/{seasonId}`
@@ -382,24 +235,7 @@ pub fn getSeasonBySeasonId(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            LeagueSeason,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(LeagueSeason, capi.gpa, body.written());
+    return try ClazhAPI.url.fetch(LeagueSeason, capi, url, &body);
 }
 
 /// Same as `/locations/global/pathoflegend/{seasonId}/rankings/players`
@@ -429,27 +265,11 @@ pub fn getPlayersPathOfLegendRankingsBySeasonId(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            PlayerPathOfLegendRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
+    return try ClazhAPI.url.fetch(
         PlayerPathOfLegendRankingResponse,
-        capi.gpa,
-        body.written(),
+        capi,
+        url,
+        &body,
     );
 }
 
@@ -480,28 +300,7 @@ pub fn getPlayersSeasonRankingsBySeasonId(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            PlayerRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
-        PlayerRankingResponse,
-        capi.gpa,
-        body.written(),
-    );
+    return try ClazhAPI.url.fetch(PlayerRankingResponse, capi, url, &body);
 }
 
 /// Same as `/locations/global/rankings/tournaments/{tournamentTag}`
@@ -530,26 +329,10 @@ pub fn getGlobalTournamentRankingsByTag(
     var body = std.Io.Writer.Allocating.init(capi.gpa);
     defer body.deinit();
 
-    const res = try capi.client.fetch(.{
-        .method = .GET,
-        .location = .{ .url = url },
-        .headers = .{
-            .authorization = .{ .override = capi.token },
-        },
-        .response_writer = &body.writer,
-        .keep_alive = false,
-    });
-
-    if (res.status != .ok) {
-        return Result.Failed(
-            LadderTournamentRankingResponse,
-            try ClientError.fromJSON(capi.gpa, body.written()),
-        );
-    }
-
-    return Result.unmountJSON(
+    return try ClazhAPI.url.fetch(
         LadderTournamentRankingResponse,
-        capi.gpa,
-        body.written(),
+        capi,
+        url,
+        &body,
     );
 }
